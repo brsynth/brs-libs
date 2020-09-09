@@ -52,12 +52,12 @@ class rpCache:
     # static attribues
     _convertMNXM = {
         'MNXM162231': 'MNXM6',
-        'MNXM84': 'MNXM15',
-        'MNXM96410': 'MNXM14',
+        'MNXM84':     'MNXM15',
+        'MNXM96410':  'MNXM14',
         'MNXM114062': 'MNXM3',
         'MNXM145523': 'MNXM57',
-        'MNXM57425': 'MNXM9',
-        'MNXM137': 'MNXM588022'
+        'MNXM57425':  'MNXM9',
+        'MNXM137':    'MNXM588022'
         }
 
     # name: sha512sum
