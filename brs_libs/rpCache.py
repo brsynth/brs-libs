@@ -83,7 +83,7 @@ class rpCache:
             'deprecatedCompID_compid',
             'rr_full_reactions',
             'cid_name'
-    ]
+            ]
 
     # name: sha512sum
     _cache_files = {
