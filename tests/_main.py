@@ -7,7 +7,6 @@ Created on Jul 15 2020
 from unittest import TestCase
 
 from pathlib import Path
-from os import path as os_path
 from os import stat as os_stat
 
 

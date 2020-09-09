@@ -6,7 +6,7 @@ Created on June 17 2020
 
 from unittest import TestCase
 
-from rplibs import rpSBML
+from brs_libs import rpSBML
 
 # Cette classe est un groupe de tests. Son nom DOIT commencer
 # par 'Test' et la classe DOIT hériter de unittest.TestCase.
