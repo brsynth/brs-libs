@@ -8,7 +8,7 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'rplibs/*'
+      - 'brs_libs/*'
   pull_request:
     branches: [ master ]
 

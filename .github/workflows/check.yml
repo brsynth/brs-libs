@@ -8,9 +8,7 @@ on:
   push:
     branches: [ dev, master ]
     paths:
-      - '**'
-      - '!RELEASE'
-      - '!LICENSE'
+      - 'brs_libs/*'
   pull_request:
     branches: [ master ]
 

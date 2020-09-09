@@ -14,7 +14,7 @@ tempdir = TemporaryDirectory()
 class Module(Main):
     __test__ = False
 
-    mod_name  = 'rplibs'
+    mod_name  = 'brs_libs'
     cls_name  = 'rpCache'
     func_name = 'generate_cache'
     args      = argparse_Namespace()

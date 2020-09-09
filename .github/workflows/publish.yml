@@ -47,11 +47,11 @@ jobs:
         sleep 30
     - name: Get module from PyPi
       run: |
-        conda skeleton pypi rplibs
+        conda skeleton pypi brs_libs
     - name: Customize recipe
       run: |
-        sed -i.bck '/\ \ host\:/a \ \ \ \ - redis' rpcompletion/meta.yaml
-        sed -i.bck '/\ \ run\:/a \ \ \ \ - rdkit' rpcompletion/meta.yaml
+        sed -i.bck '/\ \ host\:/a \ \ \ \ - redis' brs_libs/meta.yaml
+        sed -i.bck '/\ \ run\:/a \ \ \ \ - rdkit' brs_libs/meta.yaml
     - name: Add channels
       run: |
         conda config \
@@ -62,7 +62,7 @@ jobs:
           --add channels rdkit
     - name: Build for Python ${{ matrix.python-version }}
       run: |
-        conda-build --python ${{ matrix.python-version }} rplibs
+        conda-build --python ${{ matrix.python-version }} brs_libs
     - name: Upload package
       env:
         CONDA_USERNAME: ${{ secrets.CONDA_USERNAME }}

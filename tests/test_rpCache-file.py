@@ -5,7 +5,7 @@ Created on Jul 15 2020
 """
 
 from module_rpCache import Module
-from rplibs import rpCache
+from brs_libs       import rpCache
 
 
 class Test_File(Module):
