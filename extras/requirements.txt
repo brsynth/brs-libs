@@ -1,0 +1,10 @@
+# rpSBML
+python-libsbml
+numpy
+pandas
+# rpCache
+brs_utils
+credisdict
+redis
+requests
+colored
