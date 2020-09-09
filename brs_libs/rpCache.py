@@ -25,8 +25,8 @@ from colored    import attr as c_attr
 
 
 def add_arguments(parser):
-    # parser.add_argument('-sm', '--store_mode', type=str, default='file',
-    #                     help='data storage mode: file or db')
+    parser.add_argument('-sm', '--store_mode', type=str, default='file',
+                        help='data storage mode: file or db')
     parser.add_argument('--gen_cache', default=None, type=str, dest='cache_dir',
                         help='generate the cache and exits')
     # parser.add_argument('-p', '--print', type=bool, default=False,
