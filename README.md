@@ -1,4 +1,4 @@
-# brs_libs
+# brs-libs
 
 [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/latest_release_date.svg)](https://anaconda.org/brsynth/brs_libs) [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/version.svg)](https://anaconda.org/brsynth/brs_libs)
 
