@@ -840,12 +840,12 @@ class rpCache:
                     # WARNING: one reaction rule can have multiple reactions associated with them
                     # To change when you can set subpaths from the mutliple numbers of
                     # we assume that the reaction rule has multiple unique reactions associated
-                    if row['# Rule_ID'] not in rr_reactions:
-                        rr_reactions[row['# Rule_ID']] = {}
-                    if row['# Rule_ID'] in rr_reactions[row['# Rule_ID']]:
-                        rpCache.logger.warning('There is already reaction ' + str(row['# Rule_ID']) + ' in reaction rule ' + str(row['# Rule_ID']))
-                    rr_reactions[row['# Rule_ID']][row['Reaction_ID']] = {
-                        'rule_id': row['# Rule_ID'],
+                    if row['#Rule_ID'] not in rr_reactions:
+                        rr_reactions[row['#Rule_ID']] = {}
+                    if row['#Rule_ID'] in rr_reactions[row['#Rule_ID']]:
+                        rpCache.logger.warning('There is already reaction ' + str(row['#Rule_ID']) + ' in reaction rule ' + str(row['#Rule_ID']))
+                    rr_reactions[row['#Rule_ID']][row['Reaction_ID']] = {
+                        'rule_id': row['#Rule_ID'],
                         'rule_score': float(row['Score_normalized']),
                         'reac_id': rpCache._checkRIDdeprecated(row['Reaction_ID'], deprecatedRID_rid),
                         'subs_id': rpCache._checkCIDdeprecated(row['Substrate_ID'], deprecatedCID_cid),
@@ -925,7 +925,7 @@ class rpCache:
                 ### add the others
                 tmp['main_left'] = row['Main_left'].split(',')
                 tmp['main_right'] = row['Main_right'].split(',')
-                reaction[rpCache._checkRIDdeprecated(row['# Reaction_ID'], deprecatedRID_rid)] = tmp
+                reaction[rpCache._checkRIDdeprecated(row['#Reaction_ID'], deprecatedRID_rid)] = tmp
             return reaction
         except FileNotFoundError:
             rpCache.logger.error('Cannot find file: ' + str(rxn_recipes_path))
