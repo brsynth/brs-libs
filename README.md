@@ -32,11 +32,11 @@ rpCompletion requires [RDKit](https://www.RDKit.org) which is not available thro
 ```
 #### From pip
 ```sh
-[sudo] python -m pip install rpcompletion
+[sudo] python -m pip install brs_libs
 ```
 #### From Conda
 ```sh
-[sudo] conda install -c brsynth rpcompletion
+[sudo] conda install -c brsynth brs_libs
 ```
 
 ### Run
