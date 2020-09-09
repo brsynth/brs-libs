@@ -40,7 +40,7 @@ def build_parser():
 ## Class to generate the cache
 #
 # Contains all the functions that parse different files, used to calculate the thermodynamics and the FBA of the
-# the other steps. These should be called only when the files have changes
+#the other steps. These should be called only when the files have changes
 class rpCache:
 
     logger = logging_getLogger(__name__)
@@ -52,12 +52,12 @@ class rpCache:
     # static attribues
     _convertMNXM = {
         'MNXM162231': 'MNXM6',
-        'MNXM84':     'MNXM15',
-        'MNXM96410':  'MNXM14',
+        'MNXM84': 'MNXM15',
+        'MNXM96410': 'MNXM14',
         'MNXM114062': 'MNXM3',
         'MNXM145523': 'MNXM57',
-        'MNXM57425':  'MNXM9',
-        'MNXM137':    'MNXM588022'
+        'MNXM57425': 'MNXM9',
+        'MNXM137': 'MNXM588022'
         }
 
     # name: sha512sum
@@ -83,7 +83,7 @@ class rpCache:
             'deprecatedCompID_compid',
             'rr_full_reactions',
             'cid_name'
-            ]
+    ]
 
     # name: sha512sum
     _cache_files = {
@@ -110,13 +110,12 @@ class rpCache:
     #
     # @param self The object pointer
     # @param db Mode of storing objects ('file' or 'redis')
-
     def __init__(self, db='file'):
 
         self.store_mode = db
         rpCache._db_timeout = 10
 
-        self.dirname = os_path.dirname( os_path.abspath( __file__ ) )
+        self.dirname = os_path.dirname(os_path.abspath( __file__ ))#+"/.."
         # input_cache
         self._input_cache_dir = self.dirname+'/input_cache/'
         # cache
@@ -156,7 +155,7 @@ class rpCache:
             self.rr_full_reactions       = None
 
         try:
-            if self.store_mode == 'file':
+            if self.store_mode=='file':
                 self._check_or_load_cache_in_memory(self._cache_dir)
             else:
                 self._check_or_load_cache_in_db(self._cache_dir)
@@ -164,7 +163,7 @@ class rpCache:
             print_FAILED()
             try:
                 rpCache._check_or_download_cache_to_disk(self._cache_dir)
-                if self.store_mode == 'file':
+                if self.store_mode=='file':
                     self._check_or_load_cache_in_memory(self._cache_dir)
                 else:
                     self._check_or_load_cache_in_db(self._cache_dir)
@@ -173,7 +172,7 @@ class rpCache:
                     r_exceptions.ConnectionError):
                 print_FAILED()
                 rpCache.generate_cache(self._cache_dir)
-                if self.store_mode == 'file':
+                if self.store_mode=='file':
                     self._check_or_load_cache_in_memory(self._cache_dir)
                 else:
                     self._check_or_load_cache_in_db(self._cache_dir)
@@ -193,11 +192,11 @@ class rpCache:
     #
     class DepictionError(Error):
         def __init__(self, message):
-            # self.expression = expression
+            #self.expression = expression
             self.message = message
 
-    # url = 'https://www.metanetx.org/cgi-bin/mnxget/mnxref/'
-    # url = 'ftp://ftp.vital-it.ch/databases/metanetx/MNXref/3.2/'
+    #url = 'https://www.metanetx.org/cgi-bin/mnxget/mnxref/'
+    #url = 'ftp://ftp.vital-it.ch/databases/metanetx/MNXref/3.2/'
 
     @staticmethod
     def generate_cache(outdir):
@@ -209,7 +208,7 @@ class rpCache:
         url = rpCache._cache_url
 
         # FETCH INPUT_CACHE FILES
-        input_dir = 'input-'+os_path.basename(os_path.normpath(outdir)) + '/'
+        input_dir = 'input-'+os_path.basename(os_path.normpath(outdir))+'/'
         for file in rpCache._input_cache_files.keys():
             rpCache._download_input_cache(url, file, input_dir)
 
@@ -449,7 +448,7 @@ class rpCache:
                 print_OK()
             else:
                 filename = attr+rpCache._ext
-                print("Downloading " + filename + "...", end = '', flush=True)
+                print("Downloading "+filename+"...", end = '', flush=True)
                 start_time = time_time()
                 if not os_path.isdir(cache_dir):
                     os_mkdir(cache_dir)
@@ -463,7 +462,7 @@ class rpCache:
         for attribute in rpCache._attributes:
             if not getattr(self, attribute):
                 filename = attribute+rpCache._ext
-                print("Loading " + filename + "...", end = '', flush=True)
+                print("Loading "+filename+"...", end = '', flush=True)
                 data = self._load_cache_from_file(cache_dir+filename)
                 print_OK()
                 setattr(self, attribute, data)
@@ -476,7 +475,7 @@ class rpCache:
         for attribute in rpCache._attributes:
             if not CRedisDict.exists(self.redis, attribute):
                 filename = attribute+rpCache._ext
-                print("Loading " + filename + "...", end = '', flush=True)
+                print("Loading "+filename+"...", end = '', flush=True)
                 data = self._load_cache_from_file(cache_dir+filename)
                 print_OK()
                 self._store_cache_to_db(attribute, data)
@@ -489,15 +488,15 @@ class rpCache:
     def _download_input_cache(url, file, outdir):
         if not os_path.isdir(outdir):
             os_mkdir(outdir)
-        filename = outdir + file
+        filename = outdir+file
         if not os_path.isfile(filename):
-            print("Downloading " + file + "...", end = '', flush=True)
+            print("Downloading "+file+"...", end = '', flush=True)
             start_time = time_time()
             rpCache.__download_input_cache(url, file, outdir)
             end_time = time_time()
             print_OK(end_time-start_time)
         else:
-            print(filename + " already downloaded ", end = '', flush=True)
+            print(filename+" already downloaded ", end = '', flush=True)
             print_OK()
 
 
@@ -510,16 +509,33 @@ class rpCache:
 
         # 3xCommon + rpReader
         if file in ['reac_xref.tsv.gz', 'chem_xref.tsv.gz', 'chem_prop.tsv.gz', 'comp_xref.tsv.gz']:
-            download(url+'metanetx/' + file, outdir + file)
+            download(url+'metanetx/'+file, outdir+file)
 
-        # TODO: need to add this file to the git or another location
+        #TODO: need to add this file to the git or another location
         if file in ['compounds.tsv.gz', 'rxn_recipes.tsv.gz']:
-            download(url+'rr02_more_data/' + file,
-                     outdir + file)
+            download(url+'rr02_more_data/'+file,
+                     outdir+file)
+            # tar = tarfile_open(outdir+'/rr02_more_data.tar.gz', 'r:gz')
+            # tar.extractall(outdir)
+            # tar.close()
+            # shutil_move(outdir+'/rr02_more_data/compounds.tsv',
+            #             outdir+'/rr_compounds.tsv')
+            # shutil_move(outdir+'/rr02_more_data/rxn_recipes.tsv',
+            #             outdir)
+            # os_rm(outdir+'/rr02_more_data.tar.gz')
+            # shutil_rmtree(outdir+'/rr02_more_data')
 
-        if file == 'retrorules_rr02_flat_all.tsv.gz':
-            download(url + 'retrorules_rr02_rp3_hs/' + file,
-                     outdir + file)
+        if file=='retrorules_rr02_flat_all.tsv.gz':
+            download(url+'retrorules_rr02_rp3_hs/'+file,
+                     outdir+file)
+            # download('https://retrorules.org/dl/preparsed/rr02/rp3/hs',
+            #          outdir+'/retrorules_rr02_rp3_hs.tar.gz')
+            # tar = tarfile_open(outdir+'/retrorules_rr02_rp3_hs.tar.gz', 'r:gz')
+            # tar.extractall(outdir)
+            # tar.close()
+            # shutil_move(outdir+'/retrorules_rr02_rp3_hs/retrorules_rr02_flat_all.tsv', outdir+'/rules_rall.tsv')
+            # os_rm(outdir+'/retrorules_rr02_rp3_hs.tar.gz')
+            # shutil_rmtree(outdir+'/retrorules_rr02_rp3_hs')
 
     ##########################################################
     ################## Private Functions #####################
@@ -563,7 +579,7 @@ class rpCache:
     #  @param attr_name Attribute name (database key)
     #  @param data Content of the attribute
     def _store_cache_to_db(self, attr_name, data):
-        print("Storing " + attr_name + " to db...", end='', flush=True)
+        print("Storing "+attr_name+" to db...", end = '', flush=True)
         setattr(rpCache, attr_name, CRedisDict(attr_name, self.redis, data))
         print_OK()
 
@@ -574,7 +590,6 @@ class rpCache:
     #  Generate a one-to-one dictionnary of old id's to new ones. Private function
     #
     # TODO: check other things about the mnxm emtry like if it has the right structure etc...
-
     @staticmethod
     def _checkCIDdeprecated(cid, deprecatedCID_cid):
         try:
@@ -586,7 +601,6 @@ class rpCache:
     ## Function to create a dictionnary of old to new reaction id's
     #
     # TODO: check other things about the mnxm emtry like if it has the right structure etc...
-
     @staticmethod
     def _checkRIDdeprecated(rid, deprecatedRID_rid):
         try:
@@ -594,9 +608,11 @@ class rpCache:
         except (KeyError, TypeError):
             return rid
 
+
     #################################################################
     ################## Public functions #############################
     #################################################################
+
 
     ########################### MNX parsers #############################
 
@@ -607,17 +623,16 @@ class rpCache:
     #
     # @param xref_path Input file path
     # @return Dictionnary of identifiers
-    # TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
-
+    #TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
     @staticmethod
     def _deprecatedMNX(xref_path):
         deprecatedMNX_mnx = {}
         with gzip_open(xref_path, 'rt') as f:
             c = csv_reader(f, delimiter='\t')
             for row in c:
-                if not row[0][0] == '#':
+                if not row[0][0]=='#':
                     mnx = row[0].split(':')
-                    if mnx[0] == 'deprecated':
+                    if mnx[0]=='deprecated':
                         deprecatedMNX_mnx[mnx[1]] = row[1]
         return deprecatedMNX_mnx
 
@@ -625,7 +640,6 @@ class rpCache:
     #
     # @param chem_xref_path Input file path
     # @return Dictionnary of chemical id to other chemical ids ex: deprecatedCID_cid['MNXM1'] = {'mnx': ['MNXM01', ...], ...}
-
     @staticmethod
     def _m_deprecatedMNXM(chem_xref_path):
         deprecatedCID_cid = {}
@@ -642,10 +656,10 @@ class rpCache:
     #  @param self Object pointer
     #  @param reac_xref_path Input file path
     #  @return Dictionnary of identifiers
-
     @staticmethod
     def _m_deprecatedMNXR(reac_xref_path):
         return rpCache._deprecatedMNX(reac_xref_path)
+
 
     ## Function to parse the chemp_prop.tsv file from MetanetX and compounds.tsv from RetroRules. Uses the InchIkey as key to the dictionnary
     #
@@ -657,41 +671,40 @@ class rpCache:
     #  @param chem_prop_path Path to the chem_prop.tsv file
     #  @param deprecatedCID_cid Dictionnary of deprecated CID to cid
     #  @return cid_strc Dictionnary of formula, smiles, inchi and inchikey
-
     @staticmethod
     def _m_mnxm_strc(rr_compounds_path, chem_prop_path, deprecatedCID_cid):
         cid_strc = {}
         cid_name = {}
         for row in csv_DictReader(gzip_open(rr_compounds_path, 'rt'), delimiter='\t'):
             tmp = {'formula':  None,
-                   'smiles':   None,
-                   'inchi':    row['inchi'],
-                   'inchikey': None,
-                   'cid':      rpCache._checkCIDdeprecated(row['cid'], deprecatedCID_cid),
-                   'name':     None}
+                    'smiles': None,
+                    'inchi': row['inchi'],
+                    'inchikey': None,
+                    'cid': rpCache._checkCIDdeprecated(row['cid'], deprecatedCID_cid),
+                    'name': None}
             try:
-                resConv = rpCache._convert_depiction(idepic=tmp['inchi'], itype='inchi', otype={'smiles', 'inchikey'})
+                resConv = rpCache._convert_depiction(idepic=tmp['inchi'], itype='inchi', otype={'smiles','inchikey'})
                 for i in resConv:
                     tmp[i] = resConv[i]
             except rpCache.DepictionError as e:
-                rpCache.logger.warning('Could not convert some of the structures: ' + str(tmp))
+                rpCache.logger.warning('Could not convert some of the structures: '+str(tmp))
                 rpCache.logger.warning(e)
             cid_strc[tmp['cid']] = tmp
         with gzip_open(chem_prop_path, 'rt') as f:
             c = csv_reader(f, delimiter='\t')
             for row in c:
-                if not row[0][0] == '#':
+                if not row[0][0]=='#':
                     mnxm = rpCache._checkCIDdeprecated(row[0], deprecatedCID_cid)
                     tmp = {'formula':  row[2],
-                           'smiles':   row[6],
-                           'inchi':    row[5],
-                           'inchikey': row[8],
-                           'cid':      mnxm,
-                           'name':     row[1]}
+                            'smiles': row[6],
+                            'inchi': row[5],
+                            'inchikey': row[8],
+                            'cid': mnxm,
+                            'name': row[1]}
                     for i in tmp:
-                        if tmp[i] == '' or tmp[i] == 'NA':
+                        if tmp[i]=='' or tmp[i]=='NA':
                             tmp[i] = None
-                    if mnxm not in cid_name and tmp['name']:
+                    if not mnxm in cid_name and tmp['name']:
                         cid_name[mnxm] = tmp['name']
                     if mnxm in cid_strc:
                         cid_strc[mnxm]['formula'] = row[2]
@@ -701,7 +714,7 @@ class rpCache:
                         if not cid_strc[mnxm]['inchikey'] and tmp['inchikey']:
                             cid_strc[mnxm]['inchikey'] = tmp['inchikey']
                     else:
-                        # check to see if the inchikey is valid or not
+                        #check to see if the inchikey is valid or not
                         otype = set({})
                         if not tmp['inchikey']:
                             otype.add('inchikey')
@@ -722,10 +735,11 @@ class rpCache:
                             for i in resConv:
                                 tmp[i] = resConv[i]
                         except rpCache.DepictionError as e:
-                            rpCache.logger.warning('Could not convert some of the structures: ' + str(tmp))
+                            rpCache.logger.warning('Could not convert some of the structures: '+str(tmp))
                             rpCache.logger.warning(e)
                         cid_strc[tmp['cid']] = tmp
         return cid_strc, cid_name
+
 
     ## Function to parse the chem_xref.tsv file of MetanetX
     #
@@ -734,37 +748,37 @@ class rpCache:
     #  @param chem_xref_path MetaNetX chem_xref.tsv file path
     #  @param deprecatedCID_cid Dictionnary of deprecated chemical ids to uniform cid
     #  @return Dictionnary of cross references of a given chemical id
-    # TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
-
+    #TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
     @staticmethod
     def _m_mnxm_xref(chem_xref_path, deprecatedCID_cid):
         cid_xref = {}
         with gzip_open(chem_xref_path, 'rt') as f:
             c = csv_reader(f, delimiter='\t')
             for row in c:
-                if not row[0][0] == '#':
+                if not row[0][0]=='#':
                     mnx = rpCache._checkCIDdeprecated(row[1], deprecatedCID_cid)
-                    if len(row[0].split(':')) == 1:
+                    if len(row[0].split(':'))==1:
                         dbName = 'mnx'
                         dbId = row[0]
                     else:
                         dbName = row[0].split(':')[0]
                         dbId = ''.join(row[0].split(':')[1:])
-                        if dbName == 'deprecated':
+                        if dbName=='deprecated':
                             dbName = 'mnx'
-                    # mnx
-                    if mnx not in cid_xref:
+                    #mnx
+                    if not mnx in cid_xref:
                         cid_xref[mnx] = {}
-                    if dbName not in cid_xref[mnx]:
+                    if not dbName in cid_xref[mnx]:
                         cid_xref[mnx][dbName] = []
-                    if dbId not in cid_xref[mnx][dbName]:
+                    if not dbId in cid_xref[mnx][dbName]:
                         cid_xref[mnx][dbName].append(dbId)
                     ### DB ###
-                    if dbName not in cid_xref:
+                    if not dbName in cid_xref:
                         cid_xref[dbName] = {}
-                    if dbId not in cid_xref[dbName]:
+                    if not dbId in cid_xref[dbName]:
                         cid_xref[dbName][dbId] = mnx
         return cid_xref
+
 
     ## Function to parse the comp_xref.tsv file of MetanetX
     #
@@ -772,8 +786,7 @@ class rpCache:
     #
     #  @param comp_xref_path The MetaNetX file that contains the cross references
     #  @return a The dictionnary of compartment identifiers
-    # TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
-
+    #TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
     @staticmethod
     def _m_mnxc_xref(comp_xref_path):
         comp_xref = {}
@@ -781,35 +794,39 @@ class rpCache:
         try:
             with gzip_open(comp_xref_path, 'rt') as f:
                 c = csv_reader(f, delimiter='\t')
+                #not_recognised = []
                 for row in c:
-                    if not row[0][0] == '#':
-                        # collect the info
+                    #cid = row[0].split(':')
+                    if not row[0][0]=='#':
+                        #collect the info
                         mnxc = row[1]
-                        if len(row[0].split(':')) == 1:
+                        if len(row[0].split(':'))==1:
                             dbName = 'mnx'
                             dbCompId = row[0]
                         else:
                             dbName = row[0].split(':')[0]
                             dbCompId = ''.join(row[0].split(':')[1:])
                             dbCompId = dbCompId.lower()
-                        if dbName == 'deprecated':
+                        if dbName=='deprecated':
                             dbName = 'mnx'
-                        # create the dicts
-                        if mnxc not in comp_xref:
+                        #create the dicts
+                        if not mnxc in comp_xref:
                             comp_xref[mnxc] = {}
-                        if dbName not in comp_xref[mnxc]:
+                        if not dbName in comp_xref[mnxc]:
                             comp_xref[mnxc][dbName] = []
-                        if dbCompId not in comp_xref[mnxc][dbName]:
+                        if not dbCompId in comp_xref[mnxc][dbName]:
                             comp_xref[mnxc][dbName].append(dbCompId)
-                        # create the reverse dict
-                        if dbCompId not in deprecatedCompID_compid:
+                        #create the reverse dict
+                        if not dbCompId in deprecatedCompID_compid:
                             deprecatedCompID_compid[dbCompId] = mnxc
         except FileNotFoundError:
             rpCache.logger.error('comp_xref file not found')
             return {}
-        return comp_xref, deprecatedCompID_compid
+        return comp_xref,deprecatedCompID_compid
+
 
     ######################## RetroRules specific functions ##################
+
 
     ## Function to parse the rules_rall.tsv from RetroRules
     #
@@ -820,32 +837,36 @@ class rpCache:
     #  @param deprecatedCID_cid Dictionnary of deprecated to uniformed chemical id's
     #  @param deprecatedRID_rid Dictionnary of deprecated to uniformed reaction id's
     #  @return Dictionnary describing each reaction rule
-
     @staticmethod
     def _m_rr_reactions(rules_rall_path, deprecatedCID_cid, deprecatedRID_rid):
         rr_reactions = {}
         try:
+            #with gzip_open(rules_rall_path, 'r') as f:
+            #    reader = csv.reader(f, delimiter = '\t')
+            #    next(reader)
+            #    rule = {}
+            #    for row in reader:
             for row in csv_DictReader(gzip_open(rules_rall_path, 'rt'), delimiter='\t'):
-                # NOTE: as of now all the rules are generated using MNX
-                # but it may be that other db are used, we are handling this case
-                # WARNING: can have multiple products so need to seperate them
+                #NOTE: as of now all the rules are generated using MNX
+                #but it may be that other db are used, we are handling this case
+                #WARNING: can have multiple products so need to seperate them
                 products = {}
                 for i in row['Product_IDs'].split('.'):
                     cid = rpCache._checkCIDdeprecated(i, deprecatedCID_cid)
-                    if cid not in products:
+                    if not cid in products:
                         products[cid] = 1
                     else:
                         products[cid] += 1
                 try:
-                    # WARNING: one reaction rule can have multiple reactions associated with them
-                    # To change when you can set subpaths from the mutliple numbers of
-                    # we assume that the reaction rule has multiple unique reactions associated
-                    if row['#Rule_ID'] not in rr_reactions:
-                        rr_reactions[row['#Rule_ID']] = {}
-                    if row['#Rule_ID'] in rr_reactions[row['#Rule_ID']]:
-                        rpCache.logger.warning('There is already reaction ' + str(row['#Rule_ID']) + ' in reaction rule ' + str(row['#Rule_ID']))
-                    rr_reactions[row['#Rule_ID']][row['Reaction_ID']] = {
-                        'rule_id': row['#Rule_ID'],
+                    #WARNING: one reaction rule can have multiple reactions associated with them
+                    #To change when you can set subpaths from the mutliple numbers of
+                    #we assume that the reaction rule has multiple unique reactions associated
+                    if row['# Rule_ID'] not in rr_reactions:
+                        rr_reactions[row['# Rule_ID']] = {}
+                    if row['# Rule_ID'] in rr_reactions[row['# Rule_ID']]:
+                        rpCache.logger.warning('There is already reaction '+str(row['# Rule_ID'])+' in reaction rule '+str(row['# Rule_ID']))
+                    rr_reactions[row['# Rule_ID']][row['Reaction_ID']] = {
+                        'rule_id': row['# Rule_ID'],
                         'rule_score': float(row['Score_normalized']),
                         'reac_id': rpCache._checkRIDdeprecated(row['Reaction_ID'], deprecatedRID_rid),
                         'subs_id': rpCache._checkCIDdeprecated(row['Substrate_ID'], deprecatedCID_cid),
@@ -853,12 +874,13 @@ class rpCache:
                         'left': {rpCache._checkCIDdeprecated(row['Substrate_ID'], deprecatedCID_cid): 1},
                         'right': products}
                 except ValueError:
-                    rpCache.logger.error('Problem converting rel_direction: ' + str(row['Rule_relative_direction']))
-                    rpCache.logger.error('Problem converting rule_score: ' + str(row['Score_normalized']))
+                    rpCache.logger.error('Problem converting rel_direction: '+str(row['Rule_relative_direction']))
+                    rpCache.logger.error('Problem converting rule_score: '+str(row['Score_normalized']))
             return rr_reactions
-        except FileNotFoundError:
-            rpCache.logger.error('Could not read the rules_rall file (' + str(rules_rall_path) + ')')
-            return {}
+        except FileNotFoundError as e:
+                rpCache.logger.error('Could not read the rules_rall file ('+str(rules_rall_path)+')')
+                return {}
+
 
     ## Generate complete reactions from the rxn_recipes.tsv from RetroRules
     #
@@ -869,67 +891,70 @@ class rpCache:
     #  @param self The pointer object
     #  @param rxn_recipes_path Path to the recipes file
     #  @return Boolean that determines the success or failure of the function
-
     @staticmethod
     def _m_rr_full_reactions(rxn_recipes_path, deprecatedCID_cid, deprecatedRID_rid):
         #### for character matching that are returned
-        DEFAULT_STOICHIO_RESCUE = {'4n': 4, '3n': 3, '2n': 2, 'n': 1,
-                                   '(n)': 1, '(N)': 1, '(2n)': 2, '(x)': 1,
-                                   'N': 1, 'm': 1, 'q': 1,
-                                   '0.01': 1, '0.1': 1, '0.5': 1, '1.5': 1,
-                                   '0.02': 1, '0.2': 1,
-                                   '(n-1)': 0, '(n-2)': -1}
+        DEFAULT_STOICHIO_RESCUE = {"4n": 4, "3n": 3, "2n": 2, 'n': 1,
+                           '(n)': 1, '(N)': 1, '(2n)': 2, '(x)': 1,
+                           'N': 1, 'm': 1, 'q': 1,
+                           '0.01': 1, '0.1': 1, '0.5': 1, '1.5': 1,
+                           '0.02': 1, '0.2': 1,
+                           '(n-1)': 0, '(n-2)': -1}
         reaction = {}
         try:
             for row in csv_DictReader(gzip_open(rxn_recipes_path, 'rt'), delimiter='\t'):
-                tmp = {}  # makes sure that if theres an error its not added
-                # parse the reaction equation
-                if not len(row['Equation'].split('=')) == 2:
+                tmp = {} # makes sure that if theres an error its not added
+                #parse the reaction equation
+                if not len(row['Equation'].split('='))==2:
                     rpCache.logger.warning('There should never be more or less than a left and right of an equation')
                     rpCache.logger.warnin(row['Equation'])
                     continue
                 ######### LEFT ######
                 #### MNX id
                 tmp['left'] = {}
+                # if row['#Reaction_ID']=="MNXR141948":
+                #     print(row)
+                #     exit()
                 for spe in re_findall(r'(\(n-1\)|\d+|4n|3n|2n|n|\(n\)|\(N\)|\(2n\)|\(x\)|N|m|q|\(n\-2\)|\d+\.\d+) ([\w\d]+)@\w+', row['Equation'].split('=')[0]):
-                    # 1) try to rescue if its one of the values
+                    #1) try to rescue if its one of the values
                     try:
                         tmp['left'][rpCache._checkCIDdeprecated(spe[1], deprecatedCID_cid)] = DEFAULT_STOICHIO_RESCUE[spe[0]]
                     except KeyError:
-                        # 2) try to convert to int if its not
+                        #2) try to convert to int if its not
                         try:
                             tmp['left'][rpCache._checkCIDdeprecated(spe[1], deprecatedCID_cid)] = int(spe[0])
                         except ValueError:
-                            rpCache.logger.warning('Cannot convert ' + str(spe[0]))
+                            rpCache.logger.warning('Cannot convert '+str(spe[0]))
                             continue
                 ####### RIGHT #####
-                #### MNX id
+                ####  MNX id
                 tmp['right'] = {}
                 for spe in re_findall(r'(\(n-1\)|\d+|4n|3n|2n|n|\(n\)|\(N\)|\(2n\)|\(x\)|N|m|q|\(n\-2\)|\d+\.\d+) ([\w\d]+)@\w+', row['Equation'].split('=')[1]):
-                    # 1) try to rescue if its one of the values
+                    #1) try to rescue if its one of the values
                     try:
                         tmp['right'][rpCache._checkCIDdeprecated(spe[1], deprecatedCID_cid)] = DEFAULT_STOICHIO_RESCUE[spe[0]]
                     except KeyError:
-                        # 2) try to convert to int if its not
+                        #2) try to convert to int if its not
                         try:
                             tmp['right'][rpCache._checkCIDdeprecated(spe[1], deprecatedCID_cid)] = int(spe[0])
                         except ValueError:
-                            rpCache.logger.warning('Cannot convert ' + str(spe[0]))
+                            rpCache.logger.warning('Cannot convert '+str(spe[0]))
                             continue
                 ####### DIRECTION ######
                 try:
                     tmp['direction'] = int(row['Direction'])
                 except ValueError:
-                    rpCache.logger.error('Cannot convert ' + str(row['Direction']) + ' to int')
+                    rpCache.logger.error('Cannot convert '+str(row['Direction'])+' to int')
                     continue
                 ### add the others
                 tmp['main_left'] = row['Main_left'].split(',')
                 tmp['main_right'] = row['Main_right'].split(',')
-                reaction[rpCache._checkRIDdeprecated(row['#Reaction_ID'], deprecatedRID_rid)] = tmp
+                reaction[rpCache._checkRIDdeprecated(row['# Reaction_ID'], deprecatedRID_rid)] = tmp
             return reaction
         except FileNotFoundError:
-            rpCache.logger.error('Cannot find file: ' + str(rxn_recipes_path))
+            rpCache.logger.error('Cannot find file: '+str(rxn_recipes_path))
             return False
+
 
     ######################## Generic functions ###############################
 
@@ -944,7 +969,6 @@ class rpCache:
     #  @param itype type of depiction provided as input, str
     #  @param otype types of depiction to be generated, {"", "", ..}
     #  @return odepic generated depictions, {"otype1": "odepic1", ..}
-
     @staticmethod
     def _convert_depiction(idepic, itype='smiles', otype={'inchikey'}):
         # Import (if needed)
@@ -969,6 +993,7 @@ class rpCache:
                 raise NotImplementedError('"{}" is not a valid output type'.format(otype))
         return odepic
 
+
     ## Function to parse the chem_xref.tsv file of MetanetX
     #
     #  Generate a dictionnary of all cross references for a given chemical id (MNX) to other database id's
@@ -977,8 +1002,8 @@ class rpCache:
     #  @param self Object pointer
     #  @param chem_xref_path Input file path
     #  @return a The dictionnary of identifiers
-    # TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
-
+    #TODO: save the self.deprecatedCID_cid to be used in case there rp_paths uses an old version of MNX
+#    def _m_chebi_cid(self, cid_xref):
     @staticmethod
     def _m_chebi_cid(cid_xref):
         chebi_cid = {}
@@ -998,9 +1023,8 @@ class rpCache:
         for cid in cid_strc:
             inchikey = cid_strc[cid]['inchikey']
             # This line is needed to put a value in 'inchikey', otherwise there are some problems in future strucutres
-            if not inchikey:
-                inchikey = 'NO_INCHIKEY'
-            if inchikey not in inchikey_cid:
+            if not inchikey: inchikey = 'NO_INCHIKEY'
+            if not inchikey in inchikey_cid:
                 inchikey_cid[inchikey] = []
             inchikey_cid[inchikey].append(cid)
         return inchikey_cid
