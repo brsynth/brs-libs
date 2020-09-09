@@ -51,7 +51,7 @@ rpCache.generate_cache(outdir)
 **From CLI**
 After having installed brs_libs Python module:
 ```sh
-python -m brs_libs --gen_cache
+python -m brs_libs --gen_cache <folder>
 ```
 
 
