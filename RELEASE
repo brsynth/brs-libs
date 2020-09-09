@@ -1,2 +1,5 @@
+0.1.1 - Sep 9, 2020
+    - Add '--store-mode'
+
 0.1.0 - Sep 9, 2020
     - First version with rpSBML and rpCache
