@@ -1,6 +1,6 @@
-# rplibs
+# brs_libs
 
-[![Anaconda-Server Badge](https://anaconda.org/brsynth/rplibs/badges/latest_release_date.svg)](https://anaconda.org/brsynth/rplibs) [![Anaconda-Server Badge](https://anaconda.org/brsynth/rplibs/badges/version.svg)](https://anaconda.org/brsynth/rplibs)
+[![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/latest_release_date.svg)](https://anaconda.org/brsynth/brs_libs) [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/version.svg)](https://anaconda.org/brsynth/brs_libs)
 
 Libraries for rpTools:
 * rpCache
@@ -44,14 +44,14 @@ rpCompletion requires [RDKit](https://www.RDKit.org) which is not available thro
 #### (Re-)generate the cache
 **From Python code**
 ```python
-from rplibs import rpCache
+from brs_libs import rpCache
 
 rpCache.generate_cache(outdir)
 ```
 **From CLI**
-After having installed rplibs Python module:
+After having installed brs_libs Python module:
 ```sh
-python -m rplibs --gen_cache
+python -m brs_libs --gen_cache
 ```
 
 
@@ -74,4 +74,4 @@ cd tests
 
 
 ## Licence
-rplibs is released under the MIT licence. See the LICENCE file for details.
+brs_libs is released under the MIT licence. See the LICENCE file for details.
