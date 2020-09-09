@@ -25,12 +25,12 @@ from colored    import attr as c_attr
 
 
 def add_arguments(parser):
-    parser.add_argument('-sm', '--store_mode', type=str, default='file',
-                        help='data storage mode: file or db')
-    parser.add_argument('--gen_cache', action='store_true',
+    # parser.add_argument('-sm', '--store_mode', type=str, default='file',
+    #                     help='data storage mode: file or db')
+    parser.add_argument('--gen_cache', default=None, type=str, dest='cache_dir',
                         help='generate the cache and exits')
-    parser.add_argument('-p', '--print', type=bool, default=False,
-                        help='print additional informations')
+    # parser.add_argument('-p', '--print', type=bool, default=False,
+    #                     help='print additional informations')
     return parser
 
 def build_parser():
@@ -200,6 +200,9 @@ class rpCache:
 
     @staticmethod
     def generate_cache(outdir):
+
+        if outdir == '':
+            outdir = 'cache'
 
         if not os_path.isdir(outdir):
             os_mkdir(outdir)
@@ -949,7 +952,7 @@ class rpCache:
                 ### add the others
                 tmp['main_left'] = row['Main_left'].split(',')
                 tmp['main_right'] = row['Main_right'].split(',')
-                reaction[rpCache._checkRIDdeprecated(row['# Reaction_ID'], deprecatedRID_rid)] = tmp
+                reaction[rpCache._checkRIDdeprecated(row['#Reaction_ID'], deprecatedRID_rid)] = tmp
             return reaction
         except FileNotFoundError:
             rpCache.logger.error('Cannot find file: '+str(rxn_recipes_path))
