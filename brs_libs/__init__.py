@@ -4,8 +4,9 @@ Created on June 16 2020
 @author: Joan Hérisson
 """
 
-from .rpSBML import rpSBML
+from .rpSBML  import rpSBML
 from .rpCache import rpCache
+from .rpCache import add_arguments as rpCache_add_args
 
 __all__ = ['rpSBML',
-           'rpCache']
+           'rpCache', 'rpCache_add_args']
