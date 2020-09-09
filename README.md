@@ -12,6 +12,7 @@ Defines SBML structure with additional fields relative to [RetroPath2](https://g
 ### Prerequisites
 * Python 3 with the following modules:
     * python-libsbml
+* [RDKit](https://www.RDKit.org)
 
 
 ## rpCache
