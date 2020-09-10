@@ -104,7 +104,7 @@ class rpCache:
 
     _ext = '.json.gz'
 
-
+    _pubchem_species = {}
 
     ## Cache constructor
     #
