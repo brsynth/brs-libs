@@ -14,3 +14,14 @@ class Test_rpSBML(TestCase):
 
     def test_initEmpty(self):
         rpsbml = rpSBML('rpSBML_test')
+
+    # def test_print_rpSBML(self):
+    #     rpsbml = rpSBML('rpSBML_test')
+    #     rpsbml.genericModel(
+    #             'RetroPath_Pathway_test',
+    #             'RP_model_test',
+    #             cache.comp_xref[compid],
+    #             'MNXC3',
+    #             999999,
+    #             0)
+    #     print(rpsbml)
