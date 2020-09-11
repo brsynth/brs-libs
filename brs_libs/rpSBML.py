@@ -470,7 +470,7 @@ class rpSBML:
             pd_entry = pd_matrix.iloc[[top[0][0]],[top[1][0]]]
             row_name = str(pd_entry.index[0])
             col_name = str(pd_entry.columns[0])
-            if col_name in to_ret:
+            # if col_name in to_ret:
                 # logging.debug('Overwriting (1): '+str(col_name))
                 # logging.debug(x)
             to_ret[col_name] = [row_name]
@@ -521,7 +521,7 @@ class rpSBML:
                     col_name = pd_entry.columns[0]
                     # logging.debug('Column: '+str(col_name))
                     # logging.debug('Row: '+str(row_name))
-                    if col_name in to_ret:
+                    # if col_name in to_ret:
                         # logging.debug('Overwriting (2): '+str(col_name))
                         # logging.debug(pd_matrix.values)
                     to_ret[col_name] = [row_name]
@@ -667,7 +667,7 @@ class rpSBML:
         for meas in source_target:
             reaction_match[meas] = {'id': None, 'score': 0.0, 'found': False}
             if meas in unique:
-                if len(unique[meas])>1:
+                # if len(unique[meas])>1:
                     # logging.debug('Multiple values may match, choosing the first arbitrarily: '+str(unique))
                 reaction_match[meas]['id'] = unique[meas]
                 reaction_match[meas]['score'] = round(tmp_reaction_match[meas][unique[meas][0]]['score'], 5)
