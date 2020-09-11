@@ -998,6 +998,16 @@ class rpSBML:
         return \
             len(self.model.getListOfReactions())==len(other.model.getListOfReactions()) \
         and rpSBML._normalize_pathway(self)==rpSBML._normalize_pathway(other)
+    def __lt__(self, rpsbml):
+        return self.getScore() < rpsbml.getScore()
+    def __gt__(self, rpsbml):
+        return self.getScore() > rpsbml.getScore()
+
+    def __str__(self):
+        return 'modelName: ' + str(self.modelName)  + '\n' \
+             + 'score: '     + str(self.getScore()) + '\n' \
+             + 'document: '  + str(self.document)   + '\n' \
+             + 'model: '     + str(self.model)      + '\n'
 
     def getScore(self):
         return self.rules_scores[0] / self.rules_scores[1]
