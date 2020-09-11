@@ -18,7 +18,7 @@ from pandas  import DataFrame as pd_DataFrame
 
 # logging = logging.getLogger(__name__)
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.info,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
     datefmt='%d-%m-%Y %H:%M:%S',
 )
@@ -207,7 +207,7 @@ class rpSBML:
                     rpSBML._checklibSBML(target_compartment.setSBOTerm(source_compartment.getSBOTerm()),
                             'setting target annotation')
                     comp_source_target[target_compartment.getId()] = target_compartment.getId()
-        logging.debug('comp_source_target: '+str(comp_source_target))
+        # logging.debug('comp_source_target: '+str(comp_source_target))
         ################ PARAMETERS ###########
         # WARNING: here we compare by ID
         targetParametersID = [i.getId() for i in target_rpsbml.model.getListOfParameters()]
@@ -264,18 +264,18 @@ class rpSBML:
                         'setting target flux obj annotation from source flux obj')
                 rpSBML._checklibSBML(target_objective.setAnnotation(source_objective.getAnnotation()),
                         'setting target obj annotation from source obj')
-        logging.debug('targetObjectiveID: '+str(targetObjectiveID))
-        logging.debug('sourceObjectiveID: '+str(sourceObjectiveID))
+        # logging.debug('targetObjectiveID: '+str(targetObjectiveID))
+        # logging.debug('sourceObjectiveID: '+str(sourceObjectiveID))
         ################ SPECIES ####################
         species_source_target = rpSBML.compareSpecies(comp_source_target, source_rpsbml, target_rpsbml)
-        logging.debug('species_source_target: '+str(species_source_target))
+        # logging.debug('species_source_target: '+str(species_source_target))
         for source_species in species_source_target:
             list_target = [i for i in species_source_target[source_species]]
             if source_species in list_target:
                 logging.warning('The source ('+str(source_species)+') and target species ids ('+str(list_target)+') are the same')
             # if no match then add it to the target model
             if species_source_target[source_species]=={}:
-                logging.debug('Creating source species '+str(source_species)+' in target rpsbml')
+                # logging.debug('Creating source species '+str(source_species)+' in target rpsbml')
                 source_species = source_rpsbml.model.getSpecies(source_species)
                 if not source_species:
                     logging.error('Cannot retreive model species: '+str(source_species))
@@ -313,13 +313,13 @@ class rpSBML:
             for target_reaction in target_rpsbml.model.getListOfReactions():
                 score, match = rpSBML.compareReaction(species_source_target, source_reaction, target_reaction)
                 if match:
-                    logging.debug('Source reaction '+str(source_reaction)+' matches with target reaction '+str(target_reaction))
+                    # logging.debug('Source reaction '+str(source_reaction)+' matches with target reaction '+str(target_reaction))
                     # source_reaction[source_reaction.getId()] = target_reaction.getId()
                     reac_replace[source_reaction.getId()] = target_reaction.getId()
                     is_found = True
                     break
             if not is_found:
-                logging.debug('Cannot find source reaction: '+str(source_reaction.getId()))
+                # logging.debug('Cannot find source reaction: '+str(source_reaction.getId()))
                 rpSBML._checklibSBML(source_reaction, 'fetching source reaction')
                 target_reaction = target_rpsbml.model.createReaction()
                 rpSBML._checklibSBML(target_reaction, 'create reaction')
@@ -348,9 +348,9 @@ class rpSBML:
                 rpSBML._checklibSBML(target_reaction.setAnnotation(source_reaction.getAnnotation()),
                         'setting annotation for source reaction')
                 # Reactants
-                logging.debug('Setting reactants')
+                # logging.debug('Setting reactants')
                 for source_reaction_reactantID in [i.species for i in source_reaction.getListOfReactants()]:
-                    logging.debug('\tAdding '+str(source_reaction_reactantID))
+                    # logging.debug('\tAdding '+str(source_reaction_reactantID))
                     target_reactant = target_reaction.createReactant()
                     rpSBML._checklibSBML(target_reactant, 'create target reactant')
                     if source_reaction_reactantID in species_source_target:
@@ -374,9 +374,9 @@ class rpSBML:
                     rpSBML._checklibSBML(target_reactant.setStoichiometry(source_reactant.getStoichiometry()),
                             'set stoichiometry ('+str(source_reactant.getStoichiometry)+')')
                 # Products
-                logging.debug('Setting products')
+                # logging.debug('Setting products')
                 for source_reaction_productID in [i.species for i in source_reaction.getListOfProducts()]:
-                    logging.debug('\tAdding '+str(source_reaction_productID))
+                    # logging.debug('\tAdding '+str(source_reaction_productID))
                     target_product = target_reaction.createProduct()
                     rpSBML._checklibSBML(target_product, 'create target reactant')
                     if source_reaction_productID in species_source_target:
@@ -413,8 +413,8 @@ class rpSBML:
         rpSBML._checklibSBML(source_groups, 'fetching the source model groups')
         target_groups = target_rpsbml.model.getPlugin('groups')
         rpSBML._checklibSBML(target_groups, 'fetching the target model groups')
-        # logging.debug('species_source_target: '+str(species_source_target))
-        # logging.debug('reac_replace: '+str(reac_replace))
+        # # logging.debug('species_source_target: '+str(species_source_target))
+        # # logging.debug('reac_replace: '+str(reac_replace))
         # TODO: this will overwrite two groups of the same id, need to change
         for group in source_groups.getListOfGroups():
             # for all the species that need to be converted, replace the ones that are
@@ -423,8 +423,8 @@ class rpSBML:
                 for member in group.getListOfMembers():
                     if member.getIdRef() in species_source_target:
                         list_species = [i for i in species_source_target[member.getIdRef()]]
-                        logging.debug('species_source_target: '+str(species_source_target))
-                        logging.debug('list_species: '+str(list_species))
+                        # logging.debug('species_source_target: '+str(species_source_target))
+                        # logging.debug('list_species: '+str(list_species))
                         if len(list_species)==0:
                             logging.warning('Source species '+str(member.getIdRef())+' has been created in the target model')
                         elif len(list_species)>1:
@@ -451,10 +451,10 @@ class rpSBML:
 
     @staticmethod
     def _findUniqueRowColumn(pd_matrix):
-        logging.debug(pd_matrix)
+        # logging.debug(pd_matrix)
         to_ret = {}
         ######################## filter by the global top values ################
-        logging.debug('################ Filter best #############')
+        # logging.debug('################ Filter best #############')
         # transform to np.array
         x = pd_matrix.values
         # resolve the rouding issues to find the max
@@ -471,23 +471,23 @@ class rpSBML:
             row_name = str(pd_entry.index[0])
             col_name = str(pd_entry.columns[0])
             if col_name in to_ret:
-                logging.debug('Overwriting (1): '+str(col_name))
-                logging.debug(x)
+                # logging.debug('Overwriting (1): '+str(col_name))
+                # logging.debug(x)
             to_ret[col_name] = [row_name]
             # delete the rows and the columns
-            logging.debug('==================')
-            logging.debug('Column: '+str(col_name))
-            logging.debug('Row: '+str(row_name))
+            # logging.debug('==================')
+            # logging.debug('Column: '+str(col_name))
+            # logging.debug('Row: '+str(row_name))
             pd_matrix.loc[:, col_name] = 0.0
             pd_matrix.loc[row_name, :] = 0.0
             x = pd_matrix.values
             x = np.around(x, decimals=5)
             top = np.where(x == np.max(x))
-            logging.debug(pd_matrix)
-            logging.debug(top)
-            logging.debug('==================')
+            # logging.debug(pd_matrix)
+            # logging.debug(top)
+            # logging.debug('==================')
         #################### filter by columns (measured) top values ##############
-        logging.debug('################ Filter by column best ############')
+        # logging.debug('################ Filter by column best ############')
         x = pd_matrix.values
         x = np.around(x, decimals=5)
         if np.count_nonzero(x)==0:
@@ -516,24 +516,24 @@ class rpSBML:
                     # if you perform any changes on the rows and columns, then you can perform the loop again
                     reloop = True
                     pd_entry = pd_matrix.iloc[[top_row],[col]]
-                    logging.debug('==================')
+                    # logging.debug('==================')
                     row_name = pd_entry.index[0]
                     col_name = pd_entry.columns[0]
-                    logging.debug('Column: '+str(col_name))
-                    logging.debug('Row: '+str(row_name))
+                    # logging.debug('Column: '+str(col_name))
+                    # logging.debug('Row: '+str(row_name))
                     if col_name in to_ret:
-                        logging.debug('Overwriting (2): '+str(col_name))
-                        logging.debug(pd_matrix.values)
+                        # logging.debug('Overwriting (2): '+str(col_name))
+                        # logging.debug(pd_matrix.values)
                     to_ret[col_name] = [row_name]
                     # delete the rows and the columns
                     pd_matrix.loc[:, col_name] = 0.0
                     pd_matrix.loc[row_name, :] = 0.0
                     x = pd_matrix.values
                     x = np.around(x, decimals=5)
-                    logging.debug(pd_matrix)
-                    logging.debug('==================')
+                    # logging.debug(pd_matrix)
+                    # logging.debug('==================')
         ################## laslty if there are multiple values that are not 0.0 then account for that ######
-        logging.debug('################# get the rest ##########')
+        # logging.debug('################# get the rest ##########')
         x = pd_matrix.values
         x = np.around(x, decimals=5)
         if np.count_nonzero(x)==0:
@@ -559,8 +559,8 @@ class rpSBML:
                         if col_name not in to_ret:
                             to_ret[col_name] = []
                         to_ret[col_name].append(row_name)
-        logging.debug(pd_matrix)
-        logging.debug('###################')
+        # logging.debug(pd_matrix)
+        # logging.debug('###################')
         return to_ret
 
     ##########################################################################################
@@ -575,7 +575,7 @@ class rpSBML:
     def compareReactions(species_match, target_rpsbml, source_rpsbml):
         ############## compare the reactions #######################
         # construct sim reactions with species
-        logging.debug('------ Comparing reactions --------')
+        # logging.debug('------ Comparing reactions --------')
         # match the reactants and products conversion to sim species
         tmp_reaction_match = {}
         source_target = {}
@@ -590,8 +590,8 @@ class rpSBML:
                     target_source[target_reaction.getId()] = {}
                 target_source[target_reaction.getId()][source_reaction.getId()] = {}
                 source_target[source_reaction.getId()][target_reaction.getId()] = {}
-                logging.debug('\t=========== '+str(target_reaction.getId())+' ==========')
-                logging.debug('\t+++++++ Species match +++++++')
+                # logging.debug('\t=========== '+str(target_reaction.getId())+' ==========')
+                # logging.debug('\t+++++++ Species match +++++++')
                 tmp_reaction_match[source_reaction.getId()][target_reaction.getId()] = {'reactants': {},
                                                                              'reactants_score': 0.0,
                                                                              'products': {},
@@ -607,25 +607,25 @@ class rpSBML:
                 sim_reactants_id = [reactant.species for reactant in target_reaction.getListOfReactants()]
                 sim_products_id = [product.species for product in target_reaction.getListOfProducts()]
                 ############ species ############
-                logging.debug('\tspecies_match: '+str(species_match))
-                logging.debug('\tspecies_match: '+str(species_match.keys()))
-                logging.debug('\tsim_reactants_id: '+str(sim_reactants_id))
-                logging.debug('\tmeasured_reactants_id: '+str([i.species for i in source_reaction.getListOfReactants()]))
-                logging.debug('\tsim_products_id: '+str(sim_products_id))
-                logging.debug('\tmeasured_products_id: '+str([i.species for i in source_reaction.getListOfProducts()]))
+                # logging.debug('\tspecies_match: '+str(species_match))
+                # logging.debug('\tspecies_match: '+str(species_match.keys()))
+                # logging.debug('\tsim_reactants_id: '+str(sim_reactants_id))
+                # logging.debug('\tmeasured_reactants_id: '+str([i.species for i in source_reaction.getListOfReactants()]))
+                # logging.debug('\tsim_products_id: '+str(sim_products_id))
+                # logging.debug('\tmeasured_products_id: '+str([i.species for i in source_reaction.getListOfProducts()]))
                 # ensure that the match is 1:1
                 # 1)Here we assume that a reaction cannot have twice the same species
                 cannotBeSpecies = []
                 # if there is a match then we loop again since removing it from the list of potential matches would be appropriate
                 keep_going = True
                 while keep_going:
-                    logging.debug('\t\t----------------------------')
+                    # logging.debug('\t\t----------------------------')
                     keep_going = False
                     for reactant in source_reaction.getListOfReactants():
-                        logging.debug('\t\tReactant: '+str(reactant.species))
+                        # logging.debug('\t\tReactant: '+str(reactant.species))
                         # if a species match has been found AND if such a match has been found
                         founReaIDs = [tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][i]['id'] for i in tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'] if not tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][i]['id']==None]
-                        logging.debug('\t\tfounReaIDs: '+str(founReaIDs))
+                        # logging.debug('\t\tfounReaIDs: '+str(founReaIDs))
                         if reactant.species and reactant.species in species_match and not list(species_match[reactant.species].keys())==[] and not reactant.species in founReaIDs:
                             best_spe = [k for k, v in sorted(species_match[reactant.species].items(), key=lambda item: item[1], reverse=True)][0]
                             tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][reactant.species] = {'id': best_spe, 'score': species_match[reactant.species][best_spe], 'found': True}
@@ -634,9 +634,9 @@ class rpSBML:
                             logging.warning('\t\tCould not find the following measured reactant in the matched species: '+str(reactant.species))
                             tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][reactant.species] = {'id': None, 'score': 0.0, 'found': False}
                     for product in source_reaction.getListOfProducts():
-                        logging.debug('\t\tProduct: '+str(product.species))
+                        # logging.debug('\t\tProduct: '+str(product.species))
                         foundProIDs = [tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['products'][i]['id'] for i in tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['products'] if not tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['products'][i]['id']==None]
-                        logging.debug('\t\tfoundProIDs: '+str(foundProIDs))
+                        # logging.debug('\t\tfoundProIDs: '+str(foundProIDs))
                         if product.species and product.species in species_match and not list(species_match[product.species].keys())==[] and not product.species in foundProIDs:
                             best_spe = [k for k, v in sorted(species_match[product.species].items(), key=lambda item: item[1], reverse=True)][0]
                             tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][product.species] = {'id': best_spe, 'score': species_match[product.species][best_spe], 'found': True}
@@ -644,7 +644,7 @@ class rpSBML:
                         elif not product.species in tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['products']:
                             logging.warning('\t\tCould not find the following measured product in the matched species: '+str(product.species))
                             tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['products'][product.species] = {'id': None, 'score': 0.0, 'found': False}
-                    logging.debug('\t\tcannotBeSpecies: '+str(cannotBeSpecies))
+                    # logging.debug('\t\tcannotBeSpecies: '+str(cannotBeSpecies))
                 reactants_score = [tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][i]['score'] for i in tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants']]
                 reactants_found = [tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants'][i]['found'] for i in tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants']]
                 tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['reactants_score'] = np.mean(reactants_score)
@@ -661,21 +661,21 @@ class rpSBML:
                 source_target[source_reaction.getId()][target_reaction.getId()] = tmp_reaction_match[source_reaction.getId()][target_reaction.getId()]['score']
         ### matrix compare #####
         unique = rpSBML._findUniqueRowColumn(pd_DataFrame(source_target))
-        logging.debug('findUniqueRowColumn')
-        logging.debug(unique)
+        # logging.debug('findUniqueRowColumn')
+        # logging.debug(unique)
         reaction_match = {}
         for meas in source_target:
             reaction_match[meas] = {'id': None, 'score': 0.0, 'found': False}
             if meas in unique:
                 if len(unique[meas])>1:
-                    logging.debug('Multiple values may match, choosing the first arbitrarily: '+str(unique))
+                    # logging.debug('Multiple values may match, choosing the first arbitrarily: '+str(unique))
                 reaction_match[meas]['id'] = unique[meas]
                 reaction_match[meas]['score'] = round(tmp_reaction_match[meas][unique[meas][0]]['score'], 5)
                 reaction_match[meas]['found'] = tmp_reaction_match[meas][unique[meas][0]]['found']
         #### compile a reaction score based on the ec and species scores
-        logging.debug(tmp_reaction_match)
-        logging.debug(reaction_match)
-        logging.debug('-------------------------------')
+        # logging.debug(tmp_reaction_match)
+        # logging.debug(reaction_match)
+        # logging.debug('-------------------------------')
         return reaction_match
 
 
@@ -707,7 +707,7 @@ class rpSBML:
                     scores.append(0.0)
                     all_match = False
             else:
-                logging.debug('Cannot find the source species '+str(source_reactant.species)+' in the target species: '+str(species_source_target))
+                # logging.debug('Cannot find the source species '+str(source_reactant.species)+' in the target species: '+str(species_source_target))
                 scores.append(0.0)
                 all_match = False
         # products
@@ -725,7 +725,7 @@ class rpSBML:
                     scores.append(0.0)
                     all_match = False
             else:
-                logging.debug('Cannot find the measured species '+str(source_product.species)+' in the the matched species: '+str(species_source_target))
+                # logging.debug('Cannot find the measured species '+str(source_product.species)+' in the the matched species: '+str(species_source_target))
                 scores.append(0.0)
                 all_match = False
         return np.mean(scores), all_match
@@ -776,12 +776,12 @@ class rpSBML:
                 target_products.append(i.species)
                 scores.append(1.0)
         '''
-        logging.debug('source_reactants: '+str(source_reactants))
-        logging.debug('target_reactants: '+str(target_reactants))
-        logging.debug('source_products: '+str(source_products))
-        logging.debug('target_products: '+str(target_products))
-        logging.debug(set(source_reactants)-set(target_reactants))
-        logging.debug(set(source_products)-set(target_products))
+        # logging.debug('source_reactants: '+str(source_reactants))
+        # logging.debug('target_reactants: '+str(target_reactants))
+        # logging.debug('source_products: '+str(source_products))
+        # logging.debug('target_products: '+str(target_products))
+        # logging.debug(set(source_reactants)-set(target_reactants))
+        # logging.debug(set(source_products)-set(target_products))
         '''
 
         if not set(source_reactants)-set(target_reactants) and not set(source_products)-set(target_products):
@@ -805,7 +805,7 @@ class rpSBML:
         target_source = {}
         species_match = {}
         for source_species in source_rpsbml.model.getListOfSpecies():
-            logging.debug('--- Trying to match chemical species: '+str(source_species.getId())+' ---')
+            # logging.debug('--- Trying to match chemical species: '+str(source_species.getId())+' ---')
             source_target[source_species.getId()] = {}
             species_match[source_species.getId()] = {}
             # species_match[source_species.getId()] = {'id': None, 'score': 0.0, 'found': False}
@@ -824,7 +824,7 @@ class rpSBML:
                 target_miriam_annot = target_rpsbml.readMIRIAMAnnotation(target_species.getAnnotation())
                 #### MIRIAM ####
                 if target_rpsbml.compareMIRIAMAnnotations(source_species.getAnnotation(), target_species.getAnnotation()):
-                    logging.debug('--> Matched MIRIAM: '+str(target_species.getId()))
+                    # logging.debug('--> Matched MIRIAM: '+str(target_species.getId()))
                     source_target[source_species.getId()][target_species.getId()]['score'] += 0.4
                     # source_target[source_species.getId()][target_species.getId()]['score'] += 0.2+0.2*jaccardMIRIAM(target_miriam_annot, source_miriam_annot)
                     source_target[source_species.getId()][target_species.getId()]['found'] = True
@@ -850,14 +850,14 @@ class rpSBML:
                     target_inchikey_split = target_miriam_annot['inchikey'][0].split('-')
                 if source_inchikey_split and target_inchikey_split:
                     if source_inchikey_split[0]==target_inchikey_split[0]:
-                        logging.debug('Matched first layer InChIkey: ('+str(source_inchikey_split)+' -- '+str(target_inchikey_split)+')')
+                        # logging.debug('Matched first layer InChIkey: ('+str(source_inchikey_split)+' -- '+str(target_inchikey_split)+')')
                         source_target[source_species.getId()][target_species.getId()]['score'] += 0.2
                         if source_inchikey_split[1]==target_inchikey_split[1]:
-                            logging.debug('Matched second layer InChIkey: ('+str(source_inchikey_split)+' -- '+str(target_inchikey_split)+')')
+                            # logging.debug('Matched second layer InChIkey: ('+str(source_inchikey_split)+' -- '+str(target_inchikey_split)+')')
                             source_target[source_species.getId()][target_species.getId()]['score'] += 0.2
                             source_target[source_species.getId()][target_species.getId()]['found'] = True
                             if source_inchikey_split[2]==target_inchikey_split[2]:
-                                logging.debug('Matched third layer InChIkey: ('+str(source_inchikey_split)+' -- '+str(target_inchikey_split)+')')
+                                # logging.debug('Matched third layer InChIkey: ('+str(source_inchikey_split)+' -- '+str(target_inchikey_split)+')')
                                 source_target[source_species.getId()][target_species.getId()]['score'] += 0.2
                                 source_target[source_species.getId()][target_species.getId()]['found'] = True
                 target_source[target_species.getId()][source_species.getId()]['score'] = source_target[source_species.getId()][target_species.getId()]['score']
@@ -869,8 +869,8 @@ class rpSBML:
             for y in source_target[i]:
                 source_target_mat[i][y] = source_target[i][y]['score']
         unique = rpSBML._findUniqueRowColumn(pd_DataFrame(source_target_mat))
-        logging.debug('findUniqueRowColumn:')
-        logging.debug(unique)
+        # logging.debug('findUniqueRowColumn:')
+        # logging.debug(unique)
         for meas in source_target:
             if meas in unique:
                 species_match[meas] = {}
@@ -878,10 +878,10 @@ class rpSBML:
                     species_match[meas][unique_spe] = round(source_target[meas][unique[meas][0]]['score'], 5)
             else:
                 logging.warning('Cannot find a species match for the measured species: '+str(meas))
-        logging.debug('#########################')
-        logging.debug('species_match:')
-        logging.debug(species_match)
-        logging.debug('-----------------------')
+        # logging.debug('#########################')
+        # logging.debug('species_match:')
+        # logging.debug(species_match)
+        # logging.debug('-----------------------')
         return species_match
 
 
@@ -904,10 +904,10 @@ class rpSBML:
             for i in range(len(sim_frac_ec)):
                 for y in range(len(sim_frac_ec[i]), 4):
                     sim_frac_ec[i].append(None)
-            logging.debug('Measured: ')
-            logging.debug(measured_frac_ec)
-            logging.debug('Simulated: ')
-            logging.debug(sim_frac_ec)
+            # logging.debug('Measured: ')
+            # logging.debug(measured_frac_ec)
+            # logging.debug('Simulated: ')
+            # logging.debug(sim_frac_ec)
             best_ec_compare = {'meas_ec': [], 'sim_ec': [], 'score': 0.0, 'found': False}
             for ec_m in measured_frac_ec:
                 for ec_s in sim_frac_ec:
@@ -1154,7 +1154,7 @@ class rpSBML:
     # @sbase_obj libSBML object that may be compartment, reaction or species
     #
     def addUpdateBRSynth(self, sbase_obj, annot_header, value, units=None, isAlone=False, isList=False, isSort=True, meta_id=None):
-        logging.debug('############### '+str(annot_header)+' ################')
+        # logging.debug('############### '+str(annot_header)+' ################')
         if isList:
             annotation = '''<annotation>
       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
@@ -1222,9 +1222,9 @@ class rpSBML:
              return False
         # add the annotation and replace if it exists
         isfound_target = False
-        # logging.debug(brsynth_annot.toXMLString())
+        # # logging.debug(brsynth_annot.toXMLString())
         for i in range(brsynth_annot.getNumChildren()):
-            logging.debug(annot_header+' -- '+str(brsynth_annot.getChild(i).getName()))
+            # logging.debug(annot_header+' -- '+str(brsynth_annot.getChild(i).getName()))
             if annot_header == brsynth_annot.getChild(i).getName():
                 isfound_target = True
                 '''
@@ -1235,30 +1235,30 @@ class rpSBML:
                 isfound_source = False
                 source_brsynth_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth')
                 for y in range(source_brsynth_annot.getNumChildren()):
-                    logging.debug('\t'+annot_header+' -- '+str(source_brsynth_annot.getChild(y).getName()))
+                    # logging.debug('\t'+annot_header+' -- '+str(source_brsynth_annot.getChild(y).getName()))
                     if str(annot_header)==str(source_brsynth_annot.getChild(y).getName()):
                         isfound_source = True
-                        logging.debug('Adding annotation to the brsynth annotation: '+str(source_brsynth_annot.getChild(y).toXMLString()))
+                        # logging.debug('Adding annotation to the brsynth annotation: '+str(source_brsynth_annot.getChild(y).toXMLString()))
                         towrite_annot = source_brsynth_annot.getChild(y)
-                        logging.debug(brsynth_annot.toXMLString())
+                        # logging.debug(brsynth_annot.toXMLString())
                         self._checklibSBML(brsynth_annot.addChild(towrite_annot), ' 1 - Adding annotation to the brsynth annotation')
-                        logging.debug(brsynth_annot.toXMLString())
+                        # logging.debug(brsynth_annot.toXMLString())
                         break
                 if not isfound_source:
                     logging.error('Cannot find '+str(annot_header)+' in source annotation')
         if not isfound_target:
-            logging.debug('Cannot find '+str(annot_header)+' in target annotation')
+            # logging.debug('Cannot find '+str(annot_header)+' in target annotation')
             isfound_source = False
             source_brsynth_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth')
             for y in range(source_brsynth_annot.getNumChildren()):
-                logging.debug('\t'+annot_header+' -- '+str(source_brsynth_annot.getChild(y).getName()))
+                # logging.debug('\t'+annot_header+' -- '+str(source_brsynth_annot.getChild(y).getName()))
                 if str(annot_header)==str(source_brsynth_annot.getChild(y).getName()):
                     isfound_source = True
-                    logging.debug('Adding annotation to the brsynth annotation: '+str(source_brsynth_annot.getChild(y).toXMLString()))
+                    # logging.debug('Adding annotation to the brsynth annotation: '+str(source_brsynth_annot.getChild(y).toXMLString()))
                     towrite_annot = source_brsynth_annot.getChild(y)
-                    logging.debug(brsynth_annot.toXMLString())
+                    # logging.debug(brsynth_annot.toXMLString())
                     self._checklibSBML(brsynth_annot.addChild(towrite_annot), '2 - Adding annotation to the brsynth annotation')
-                    logging.debug(brsynth_annot.toXMLString())
+                    # logging.debug(brsynth_annot.toXMLString())
                     break
             if not isfound_source:
                 logging.error('Cannot find '+str(annot_header)+' in source annotation')
@@ -1271,11 +1271,11 @@ class rpSBML:
             self._checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
         else:
             # try:
-            logging.debug('==============================')
+            # logging.debug('==============================')
             found_child = False
             for i in range(brsynth_annot.getNumChildren()):
                 if annot_header == brsynth_annot.getChild(i).getName():
-                    logging.debug('Found the same name to remove: '+str(annot_header))
+                    # logging.debug('Found the same name to remove: '+str(annot_header))
                     self._checklibSBML(brsynth_annot.removeChild(brsynth_annot.getIndex(i)),
                         'Removing annotation '+str(annot_header))
                     toWrite_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild(annot_header)
@@ -2443,7 +2443,7 @@ class rpSBML:
                 rpSBML._checklibSBML(newM.setIdRef(str(species_id)+'__64__'+str(compartment_id)), 'Setting name to the groups member')
         # TODO: check that it actually exists
         # add the species to the sink species
-        logging.debug('in_sink_group_id: '+str(in_sink_group_id))
+        # logging.debug('in_sink_group_id: '+str(in_sink_group_id))
         if in_sink_group_id:
             groups_plugin = self.model.getPlugin('groups')
             sink_group = groups_plugin.getGroup(in_sink_group_id)
