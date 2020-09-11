@@ -18,7 +18,7 @@ from pandas  import DataFrame as pd_DataFrame
 
 # logging = logging.getLogger(__name__)
 logging.basicConfig(
-    level=logging.info,
+    level=logging.INFO,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
     datefmt='%d-%m-%Y %H:%M:%S',
 )
