@@ -1010,7 +1010,11 @@ class rpSBML:
              + 'model: '     + str(self.model)      + '\n'
 
     def getScore(self):
-        return self.rules_scores[0] / self.rules_scores[1]
+        try:
+            return self.rules_scores[0] / self.rules_scores[1]
+        except ZeroDivisionError as e:
+            logging.error(e)
+            return -1
 
     #######################################################################
     ############################# PRIVATE FUNCTIONS #######################
