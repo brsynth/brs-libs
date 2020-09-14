@@ -2,10 +2,13 @@ import libsbml
 import logging
 import numpy as np
 from hashlib import sha256
-from os      import makedirs  as os_mkdirs
-from os      import path      as os_path
+from os      import makedirs   as os_mkdirs
+from os      import path       as os_path
 from copy    import deepcopy
-from pandas  import DataFrame as pd_DataFrame
+from pandas  import DataFrame  as pd_DataFrame
+from inspect import getmembers as inspect_getmembers
+from inspect import ismethod   as inspect_ismethod
+
 
 ## @package RetroPath SBML writer
 # Documentation for SBML representation of the different model
@@ -993,6 +996,12 @@ class rpSBML:
             d_reactions[reactions[reaction]['smiles']]['Products'] = d_products
 
         return d_reactions
+
+    def __str__(self):
+        for attr in inspect_getmembers(self):
+            if not attr[0].startswith('_'):
+                if not inspect_ismethod(attr[1]):
+                    print(attr)
 
     def __eq__(self, other):
         return \
