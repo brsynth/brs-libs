@@ -2090,11 +2090,11 @@ class rpSBML:
             lower_flux_bound=10):
         logging.info('Adding the orphan species to the GEM model')
         # only for rp species
-        groups = model.getPlugin('groups')
+        groups = self.getModel().getPlugin('groups')
         rp_pathway = groups.getGroup(pathway_id)
         reaction_id = sorted([(int(''.join(x for x in i.id_ref if x.isdigit())), i.id_ref) for i in rp_pathway.getListOfMembers()], key=lambda tup: tup[0], reverse=True)[0][1]
         # for reaction_id in [i.getId() for i in self.getModel().getListOfReactions()]:
-        for species_id in set([i.getSpecies() for i in model.getReaction(reaction_id).getListOfReactants()]+[i.getSpecies() for i in model.getReaction(reaction_id).getListOfProducts()]):
+        for species_id in set([i.getSpecies() for i in self.getModel().getReaction(reaction_id).getListOfReactants()]+[i.getSpecies() for i in self.getModel().getReaction(reaction_id).getListOfProducts()]):
             if not rpsbml:
                 isSpePro = self.isSpeciesProduct(species_id, [reaction_id])
             else:
