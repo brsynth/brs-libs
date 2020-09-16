@@ -41,34 +41,36 @@ class rpSBML:
     # @param model libSBML model object
     # @param docModel libSBML Document object
     # @param nameSpaceModel libSBML name space (not required)
-    def __init__(self, modelName, document=None, path=None):
+    def __init__(self, modelName, document=None, inFile=''):
         # WARNING: change this to reflect the different debugging levels
 #        logging.info('Started instance of rpSBML')
         # logging.setLevel(logging.INFO)
         self.modelName = modelName
         self.document = document
-        if not self.document:
-            self.model = None
-        else:
-            self.model = self.document.getModel()
-        # @Joan I keep this commented since I use the rpSBML(path='') and not sure if you made changes
-        '''
-        self.path = path
-        # More complete with
-        # self.miriam_header = {'compartment': {'go': 'go/GO:', 'mnx': 'metanetx.compartment/', 'bigg': 'bigg.compartment/', 'seed': 'seed/', 'name': 'name/'}, 'reaction': {'mnx': 'metanetx.reaction/', 'rhea': 'rhea/', 'reactome': 'reactome/', 'bigg': 'bigg.reaction/', 'sabiork': 'sabiork.reaction/', 'ec': 'ec-code/', 'biocyc': 'biocyc/', 'lipidmaps': 'lipidmaps/', 'uniprot': 'uniprot/'}, 'species': {'mnx': 'metanetx.chemical/', 'chebi': 'chebi/CHEBI:', 'bigg': 'bigg.metabolite/', 'hmdb': 'hmdb/', 'kegg_c': 'kegg.compound/', 'kegg_d': 'kegg.drug/', 'biocyc': 'biocyc/META:', 'seed': 'seed.compound/', 'metacyc': 'metacyc.compound/', 'sabiork': 'sabiork.compound/', 'reactome': 'reactome/R-ALL-'}}
-        # self.header_miriam = {'compartment': {'go': 'go', 'metanetx.compartment': 'mnx', 'bigg.compartment': 'bigg', 'seed': 'seed', 'name': 'name'}, 'reaction': {'metanetx.reaction': 'mnx', 'rhea': 'rhea', 'reactome': 'reactome', 'bigg.reaction': 'bigg', 'sabiork.reaction': 'sabiork', 'ec-code': 'ec', 'biocyc': 'biocyc', 'lipidmaps': 'lipidmaps', 'uniprot': 'uniprot'}, 'species': {'metanetx.chemical': 'mnx', 'chebi': 'chebi', 'bigg.metabolite': 'bigg', 'hmdb': 'hmdb', 'kegg.compound': 'kegg_c', 'kegg.drug': 'kegg_d', 'biocyc': 'biocyc', 'seed.compound': 'seed', 'metacyc.compound': 'metacyc', 'sabiork.compound': 'sabiork', 'reactome': 'reactome'}}
-        # removed GO
-        self.miriam_header = {'compartment': {'mnx': 'metanetx.compartment/', 'bigg': 'bigg.compartment/', 'seed': 'seed/', 'name': 'name/'}, 'reaction': {'mnx': 'metanetx.reaction/', 'rhea': 'rhea/', 'reactome': 'reactome/', 'bigg': 'bigg.reaction/', 'sabiork': 'sabiork.reaction/', 'ec': 'ec-code/', 'biocyc': 'biocyc/', 'lipidmaps': 'lipidmaps/', 'uniprot': 'uniprot/'}, 'species': {'pubchem': 'pubchem.compound/','mnx': 'metanetx.chemical/', 'chebi': 'chebi/CHEBI:', 'bigg': 'bigg.metabolite/', 'hmdb': 'hmdb/', 'kegg_c': 'kegg.compound/', 'kegg_d': 'kegg.drug/', 'biocyc': 'biocyc/META:', 'seed': 'seed.compound/', 'metacyc': 'metacyc.compound/', 'sabiork': 'sabiork.compound/', 'reactome': 'reactome/R-ALL-'}}
-        self.header_miriam = {'compartment': {'metanetx.compartment': 'mnx', 'bigg.compartment': 'bigg', 'seed': 'seed', 'name': 'name'}, 'reaction': {'metanetx.reaction': 'mnx', 'rhea': 'rhea', 'reactome': 'reactome', 'bigg.reaction': 'bigg', 'sabiork.reaction': 'sabiork', 'ec-code': 'ec', 'biocyc': 'biocyc', 'lipidmaps': 'lipidmaps', 'uniprot': 'uniprot'}, 'species': {'pubchem.compound': 'pubchem', 'metanetx.chemical': 'mnx', 'chebi': 'chebi', 'bigg.metabolite': 'bigg', 'hmdb': 'hmdb', 'kegg.compound': 'kegg_c', 'kegg.drug': 'kegg_d', 'biocyc': 'biocyc', 'seed.compound': 'seed', 'metacyc.compound': 'metacyc', 'sabiork.compound': 'sabiork', 'reactome': 'reactome'}}
-        '''
-        if path:
-            self.path = path
-            self.readSBML(path)
-        else:
-            self.path = None
-        self.rules_scores = (-1, 0)
+        self.score = {'value': -1, 'nb_rules': 0}
+
+        if inFile:
+            try:
+                self.readSBML(inFile)
+                self.compute_score()
+            except FileNotFoundError as e:
+                print(e)
+
+
         self.miriam_header = {'compartment': {'mnx': 'metanetx.compartment/', 'bigg': 'bigg.compartment/', 'seed': 'seed/', 'name': 'name/'}, 'reaction': {'mnx': 'metanetx.reaction/', 'rhea': 'rhea/', 'reactome': 'reactome/', 'bigg': 'bigg.reaction/', 'sabiork': 'sabiork.reaction/', 'ec': 'ec-code/', 'biocyc': 'biocyc/', 'lipidmaps': 'lipidmaps/', 'uniprot': 'uniprot/'}, 'species': {'inchikey': 'inchikey/', 'pubchem': 'pubchem.compound/','mnx': 'metanetx.chemical/', 'chebi': 'chebi/CHEBI:', 'bigg': 'bigg.metabolite/', 'hmdb': 'hmdb/', 'kegg_c': 'kegg.compound/', 'kegg_d': 'kegg.drug/', 'biocyc': 'biocyc/META:', 'seed': 'seed.compound/', 'metacyc': 'metacyc.compound/', 'sabiork': 'sabiork.compound/', 'reactome': 'reactome/R-ALL-'}}
         self.header_miriam = {'compartment': {'metanetx.compartment': 'mnx', 'bigg.compartment': 'bigg', 'seed': 'seed', 'name': 'name'}, 'reaction': {'metanetx.reaction': 'mnx', 'rhea': 'rhea', 'reactome': 'reactome', 'bigg.reaction': 'bigg', 'sabiork.reaction': 'sabiork', 'ec-code': 'ec', 'biocyc': 'biocyc', 'lipidmaps': 'lipidmaps', 'uniprot': 'uniprot'}, 'species': {'inchikey': 'inchikey', 'pubchem.compound': 'pubchem', 'metanetx.chemical': 'mnx', 'chebi': 'chebi', 'bigg.metabolite': 'bigg', 'hmdb': 'hmdb', 'kegg.compound': 'kegg_c', 'kegg.drug': 'kegg_d', 'biocyc': 'biocyc', 'seed.compound': 'seed', 'metacyc.compound': 'metacyc', 'sabiork.compound': 'sabiork', 'reactome': 'reactome'}}
+
+    def getModel(self):
+        return self.document.getModel()
+
+    def compute_score(self, pathway_id='rp_pathway'):
+        for member in self.readRPpathwayIDs(pathway_id):
+            reaction = self.getModel().getReaction(member)
+            self.add_rule_score(float(reaction.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild('rule_score').getAttrValue('value')))
+
+    def add_rule_score(self, score):
+        self.score['value']    += score
+        self.score['nb_rules'] += 1
 
     #############################################################################################################
     ############################################ MERGE ##########################################################
@@ -104,7 +106,7 @@ class rpSBML:
     # called rp_pathway. If not use the readSBML() function to create a model
     # We add the reactions and species from the rpsbml to the target_model
     #
-    # @param target_model input libsbml model object where we will add the reactions and species from self.model
+    # @param target_model input libsbml model object where we will add the reactions and species from self.getModel()
     # @param pathway_id String default is rp_pathway, name of the pathway id of the groups object
     # @param addOrphanSpecies Boolean Default False
     # @param bilevel_obj Tuple of size 2 with the weights associated with the targetSink and GEM objective function
@@ -954,9 +956,9 @@ class rpSBML:
 
         # Get Reactions
         reactions = {}
-        for pathway_id in pathway.readRPpathwayIDs('rp_pathway'):
-            reaction = model.getReaction(pathway_id)
-            reactions[pathway_id] = rpSBML.readBRSYNTHAnnotation(reaction.getAnnotation())
+        for reaction_id in pathway.readRPpathwayIDs():
+            reaction = model.getReaction(reaction_id)
+            reactions[reaction_id] = rpSBML.readBRSYNTHAnnotation(reaction.getAnnotation())
 
         # Get Species
         species = {}
@@ -968,13 +970,16 @@ class rpSBML:
 
         keys = ['inchikey', 'inchi', 'smiles']
         # Select Reactions already loaded (w/o Sink one then)
-        for reaction in reactions:
+        for reaction_id in reactions:
 
-            d_reactions[reactions[reaction]['smiles']] = {}
+            # id = reactions[reaction]['smiles']
+            id = reaction_id
+
+            d_reactions[reaction_id] = {}
 
             # Fill the reactants in a dedicated dict
             d_reactants = {}
-            for reactant in model.getReaction(reaction).getListOfReactants():# inchikey / inchi sinon miriam sinon IDs
+            for reactant in model.getReaction(reaction_id).getListOfReactants():# inchikey / inchi sinon miriam sinon IDs
                 # Il faut enregistrer toutes les infos (inchi, smiles, id)
                 key = rpSBML._search_key(keys, species[reactant.getSpecies()])
                 if key: key = species[reactant.getSpecies()][key]
@@ -982,18 +987,18 @@ class rpSBML:
                     key = reactant.getSpecies()
                 d_reactants[key] = reactant.getStoichiometry()
             # Put all reactants dicts in reactions dict for which smiles notations are the keys
-            d_reactions[reactions[reaction]['smiles']]['Reactants'] = d_reactants
+            d_reactions[reaction_id]['Reactants'] = d_reactants
 
             # Fill the products in a dedicated dict
             d_products = {}
-            for product in model.getReaction(reaction).getListOfProducts():
+            for product in model.getReaction(reaction_id).getListOfProducts():
                 key = rpSBML._search_key(keys, species[product.getSpecies()])
                 if key: key = species[product.getSpecies()][key]
                 else:
                     key = product.getSpecies()
                 d_products[key] = product.getStoichiometry()
             # Put all products dicts in reactions dict for which smiles notations are the keys
-            d_reactions[reactions[reaction]['smiles']]['Products'] = d_products
+            d_reactions[reaction_id]['Products'] = d_products
 
         return d_reactions
 
@@ -1004,11 +1009,14 @@ class rpSBML:
                     print(attr)
 
     def __eq__(self, other):
+            # len(self.getModel().getListOfReactions())==len(other.model.getListOfReactions()) \
         return \
-            len(self.model.getListOfReactions())==len(other.model.getListOfReactions()) \
-        and rpSBML._normalize_pathway(self)==rpSBML._normalize_pathway(other)
+            sorted(self.readRPpathwayIDs()) == sorted(other.readRPpathwayIDs()) \
+        and rpSBML._normalize_pathway(self) == rpSBML._normalize_pathway(other)
+
     def __lt__(self, rpsbml):
         return self.getScore() < rpsbml.getScore()
+
     def __gt__(self, rpsbml):
         return self.getScore() > rpsbml.getScore()
 
@@ -1016,11 +1024,11 @@ class rpSBML:
         return 'modelName: ' + str(self.modelName)  + '\n' \
              + 'score: '     + str(self.getScore()) + '\n' \
              + 'document: '  + str(self.document)   + '\n' \
-             + 'model: '     + str(self.model)      + '\n'
+             + 'model: '     + str(self.getModel())      + '\n'
 
     def getScore(self):
         try:
-            return self.rules_scores[0] / self.rules_scores[1]
+            return self.score['value'] / self.score['nb_rules']
         except ZeroDivisionError as e:
             logging.error(e)
             return -1
@@ -1419,7 +1427,7 @@ class rpSBML:
     #
     # TODO: change the name of the function to: rpJSON
     def genJSON(self, pathway_id='rp_pathway'):
-        groups = self.model.getPlugin('groups')
+        groups = self.getModel().getPlugin('groups')
         rp_pathway = groups.getGroup(pathway_id)
         reactions = rp_pathway.getListOfMembers()
         # pathway
@@ -1429,7 +1437,7 @@ class rpSBML:
         # reactions
         rpsbml_json['reactions'] = {}
         for member in reactions:
-            reaction = self.model.getReaction(member.getIdRef())
+            reaction = self.getModel().getReaction(member.getIdRef())
             annot = reaction.getAnnotation()
             rpsbml_json['reactions'][member.getIdRef()] = {}
             rpsbml_json['reactions'][member.getIdRef()]['brsynth'] = self.readBRSYNTHAnnotation(annot)
@@ -1437,7 +1445,7 @@ class rpSBML:
         # loop though all the species
         rpsbml_json['species'] = {}
         for spe_id in self.readUniqueRPspecies(pathway_id):
-            species = self.model.getSpecies(spe_id)
+            species = self.getModel().getSpecies(spe_id)
             annot = species.getAnnotation()
             rpsbml_json['species'][spe_id] = {}
             rpsbml_json['species'][spe_id]['brsynth'] = self.readBRSYNTHAnnotation(annot)
@@ -1475,17 +1483,16 @@ class rpSBML:
             logging.error('Either the file was not read correctly or the SBML is empty')
             raise FileNotFoundError
         self.document = document
-        self.model = model
         # enabling the extra packages if they do not exists when reading a model
-        if not self.model.isPackageEnabled('groups'):
-            rpSBML._checklibSBML(self.model.enablePackage(
+        if not self.getModel().isPackageEnabled('groups'):
+            rpSBML._checklibSBML(self.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/groups/version1',
                 'groups',
                 True),
                     'Enabling the GROUPS package')
             rpSBML._checklibSBML(self.document.setPackageRequired('groups', False), 'enabling groups package')
-        if not self.model.isPackageEnabled('fbc'):
-            rpSBML._checklibSBML(self.model.enablePackage(
+        if not self.getModel().isPackageEnabled('fbc'):
+            rpSBML._checklibSBML(self.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
@@ -1538,7 +1545,7 @@ class rpSBML:
     #
     #
     def findCreateObjective(self, reactions, coefficients, isMax=True, objective_id=None):
-        fbc_plugin = self.model.getPlugin('fbc')
+        fbc_plugin = self.getModel().getPlugin('fbc')
         rpSBML._checklibSBML(fbc_plugin, 'Getting FBC package')
         if not objective_id:
             objective_id = 'obj_'+'_'.join(reactions)
@@ -1568,7 +1575,7 @@ class rpSBML:
     #
     # TODO: replace the name of this function with readRPpathwayIDs
     def readRPpathwayIDs(self, pathway_id='rp_pathway'):
-        groups = self.model.getPlugin('groups')
+        groups = self.getModel().getPlugin('groups')
         rp_pathway = groups.getGroup(pathway_id)
         rpSBML._checklibSBML(rp_pathway, 'retreiving groups rp_pathway')
         toRet = []
@@ -1584,7 +1591,7 @@ class rpSBML:
     def readRPrules(self, pathway_id='rp_pathway'):
         toRet = {}
         for reacId in self.readRPpathwayIDs(pathway_id):
-            reac = self.model.getReaction(reacId)
+            reac = self.getModel().getReaction(reacId)
             brsynth_annot = self.readBRSYNTHAnnotation(reac.getAnnotation())
             if not brsynth_annot['rule_id']=='' and not brsynth_annot['smiles']=='':
                 toRet[brsynth_annot['rule_id']] = brsynth_annot['smiles'].replace('&gt;', '>')
@@ -1600,7 +1607,7 @@ class rpSBML:
             reacMembers[reacId] = {}
             reacMembers[reacId]['products'] = {}
             reacMembers[reacId]['reactants'] = {}
-            reac = self.model.getReaction(reacId)
+            reac = self.getModel().getReaction(reacId)
             for pro in reac.getListOfProducts():
                 reacMembers[reacId]['products'][pro.getSpecies()] = pro.getStoichiometry()
             for rea in reac.getListOfReactants():
@@ -1678,21 +1685,21 @@ class rpSBML:
     #
     @staticmethod
     def readBRSYNTHAnnotation(annot):
-        toRet = {'dfG_prime_m': {},
-                 'dfG_uncert': {},
-                 'dfG_prime_o': {},
-                 'path_id': None,
-                 'step_id': None,
-                 'sub_step_id': None,
-                 'rule_score': None,
-                 'smiles': None,
-                 'inchi': None,
-                 'inchikey': None,
-                 'selenzyme': None,
-                 'rule_id': None,
+        toRet = {'dfG_prime_m':   {},
+                 'dfG_uncert':    {},
+                 'dfG_prime_o':   {},
+                 'path_id':       None,
+                 'step_id':       None,
+                 'sub_step_id':   None,
+                 'rule_score':    None,
+                 'smiles':        None,
+                 'inchi':         None,
+                 'inchikey':      None,
+                 'selenzyme':     None,
+                 'rule_id':       None,
                  'rule_ori_reac': None,
-                 'rule_score': None,
-                 'global_score': None}
+                 'rule_score':    None,
+                 'global_score':  None}
         if not annot:
             logging.warning('The passed annotation is None')
             return {}
@@ -1700,9 +1707,7 @@ class rpSBML:
         for i in range(bag.getNumChildren()):
             ann = bag.getChild(i)
             if ann=='':
-                # logging.warning('This contains no attributes: '+str(ann.toXMLString()))
-                #@Joan: There is a reason why there is a print here (and below) and not logging?
-                print('This contains no attributes: '+str(ann.toXMLString()))
+                logging.warning('This contains no attributes: '+str(ann.toXMLString()))
                 continue
             if ann.getName()=='dfG_prime_m' or ann.getName()=='dfG_uncert' or ann.getName()=='dfG_prime_o' or ann.getName()[0:4]=='fba_' or ann.getName()=='flux_value':
                 try:
@@ -1710,8 +1715,7 @@ class rpSBML:
                             'units': ann.getAttrValue('units'),
                             'value': float(ann.getAttrValue('value'))}
                 except ValueError:
-                    # logging.warning('Cannot interpret '+str(ann.getName())+': '+str(ann.getAttrValue('value')+' - '+str(ann.getAttrValue('units'))))
-                    print('Cannot interpret '+str(ann.getName())+': '+str(ann.getAttrValue('value')+' - '+str(ann.getAttrValue('units'))))
+                    logging.warning('Cannot interpret '+str(ann.getName())+': '+str(ann.getAttrValue('value')+' - '+str(ann.getAttrValue('units'))))
                     toRet[ann.getName()] = {
                             'units': None,
                             'value': None}
@@ -1757,7 +1761,7 @@ class rpSBML:
         # reactants
         for i in range(reaction.getNumReactants()):
             reactant_ref = reaction.getReactant(i)
-            reactant = self.model.getSpecies(reactant_ref.getSpecies())
+            reactant = self.getModel().getSpecies(reactant_ref.getSpecies())
             if isID:
                 toRet['left'][reactant.getId()] = int(reactant_ref.getStoichiometry())
             else:
@@ -1765,7 +1769,7 @@ class rpSBML:
         # products
         for i in range(reaction.getNumProducts()):
             product_ref = reaction.getProduct(i)
-            product = self.model.getSpecies(product_ref.getSpecies())
+            product = self.getModel().getSpecies(product_ref.getSpecies())
             if isID:
                 toRet['right'][product.getId()] = int(product_ref.getStoichiometry())
             else:
@@ -1801,7 +1805,7 @@ class rpSBML:
     #
     #
     def speciesExists(self, speciesName, compartment_id='MNXC3'):
-        if speciesName in [i.getName() for i in self.model.getListOfSpecies()] or speciesName+'__64__'+compartment_id in [i.getId() for i in self.model.getListOfSpecies()]:
+        if speciesName in [i.getName() for i in self.getModel().getListOfSpecies()] or speciesName+'__64__'+compartment_id in [i.getId() for i in self.getModel().getListOfSpecies()]:
             return True
         return False
 
@@ -1815,8 +1819,8 @@ class rpSBML:
     # @param ignoreReactions List Default is empty, ignore specific reactions
     def isSpeciesProduct(self, species_id, ignoreReactions=[]):
         # return all the parameters values
-        param_dict = {i.getId(): i.getValue() for i in self.model.parameters}
-        for reaction in self.model.getListOfReactions():
+        param_dict = {i.getId(): i.getValue() for i in self.getModel().parameters}
+        for reaction in self.getModel().getListOfReactions():
             if reaction.getId() not in ignoreReactions:
                 # check that the function is reversible by reversibility and FBC bounds
                 if reaction.reversible:
@@ -1851,13 +1855,13 @@ class rpSBML:
 
 
     ## Really used to complete the monocomponent reactions
-    #{'rule_id': 'RR-01-503dbb54cf91-49-F', 'right': {'TARGET_0000000001': 1}, 'left': {'MNXM2': 1, 'MNXM376': 1}, 'pathway_id': 1, 'step': 1, 'sub_step': 1, 'transformation_id': 'TRS_0_0_17'}
+    # {'rule_id': 'RR-01-503dbb54cf91-49-F', 'right': {'TARGET_0000000001': 1}, 'left': {'MNXM2': 1, 'MNXM376': 1}, 'pathway_id': 1, 'step': 1, 'sub_step': 1, 'transformation_id': 'TRS_0_0_17'}
     #
     def outPathsDict(self, pathway_id='rp_pathway'):
         pathway = {}
         for member in self.readRPpathwayIDs(pathway_id):
             # TODO: need to find a better way
-            reaction = self.model.getReaction(member)
+            reaction = self.getModel().getReaction(member)
             brsynthAnnot = self.readBRSYNTHAnnotation(reaction.getAnnotation())
             speciesReac = self.readReactionSpecies(reaction)
             step = {'reaction_id': member,
@@ -1975,11 +1979,11 @@ class rpSBML:
                     found_meas_rp_species[meas_step_id]['products'][spe_name] = False
             rp_rp_species = self.readRPspecies()
             for rp_step_id in rp_rp_species:
-                rp_rp_species[rp_step_id]['annotation'] = self.model.getReaction(rp_step_id).getAnnotation()
+                rp_rp_species[rp_step_id]['annotation'] = self.getModel().getReaction(rp_step_id).getAnnotation()
                 for spe_name in rp_rp_species[rp_step_id]['reactants']:
-                    rp_rp_species[rp_step_id]['reactants'][spe_name] = self.model.getSpecies(spe_name).getAnnotation()
+                    rp_rp_species[rp_step_id]['reactants'][spe_name] = self.getModel().getSpecies(spe_name).getAnnotation()
                 for spe_name in rp_rp_species[rp_step_id]['products']:
-                    rp_rp_species[rp_step_id]['products'][spe_name] = self.model.getSpecies(spe_name).getAnnotation()
+                    rp_rp_species[rp_step_id]['products'][spe_name] = self.getModel().getSpecies(spe_name).getAnnotation()
         except AttributeError:
             logging.error('TODO: debug, for some reason some are passed as None here')
             return False, {}
@@ -2031,7 +2035,7 @@ class rpSBML:
         ################# Now see if all steps have been found ############
         if all(found_meas_rp_species[i]['found'] for i in found_meas_rp_species):
             found_meas_rp_species['measured_model_id'] = measured_sbml.model.getId()
-            found_meas_rp_species['rp_model_id'] = self.model.getId()
+            found_meas_rp_species['rp_model_id'] = self.getModel().getId()
             return True, found_meas_rp_species
         else:
             return False, {}
@@ -2053,19 +2057,19 @@ class rpSBML:
                                lower_bound,
                                unit='mmol_per_gDW_per_hr',
                                is_constant=True):
-        reaction = self.model.getReaction(reaction_id)
+        reaction = self.getModel().getReaction(reaction_id)
         if not reaction:
             logging.error('Cannot find the reaction: '+str(reaction_id))
             return False
         reac_fbc = reaction.getPlugin('fbc')
         rpSBML._checklibSBML(reac_fbc, 'extending reaction for FBC')
         ########## upper bound #############
-        old_upper_value = self.model.getParameter(reac_fbc.getUpperFluxBound()).value
+        old_upper_value = self.getModel().getParameter(reac_fbc.getUpperFluxBound()).value
         upper_param = self.createReturnFluxParameter(upper_bound, unit, is_constant)
         rpSBML._checklibSBML(reac_fbc.setUpperFluxBound(upper_param.getId()),
             'setting '+str(reaction_id)+' upper flux bound')
         ######### lower bound #############
-        old_lower_value = self.model.getParameter(reac_fbc.getLowerFluxBound()).value
+        old_lower_value = self.getModel().getParameter(reac_fbc.getLowerFluxBound()).value
         lower_param = self.createReturnFluxParameter(lower_bound, unit, is_constant)
         rpSBML._checklibSBML(reac_fbc.setLowerFluxBound(lower_param.getId()),
             'setting '+str(reaction_id)+' lower flux bound')
@@ -2073,7 +2077,7 @@ class rpSBML:
 
 
     ##### ADD SOURCE FROM ORPHAN #####
-    # if the heterologous pathway from the self.model contains a sink molecule that is not included in the
+    # if the heterologous pathway from the self.getModel() contains a sink molecule that is not included in the
     # original model (we call orhpan species) then add another reaction that creates it
     # TODO: that transports the reactions that creates the species in the
     # extracellular matrix and another reaction that transports it from the extracellular matrix to the cytoplasm
@@ -2084,16 +2088,12 @@ class rpSBML:
             compartment_id='MNXC3',
             upper_flux_bound=999999,
             lower_flux_bound=10):
-        if not rpsbml:
-            model = self.model
-        else:
-            model = rpsbml.model
         logging.info('Adding the orphan species to the GEM model')
         # only for rp species
         groups = model.getPlugin('groups')
         rp_pathway = groups.getGroup(pathway_id)
         reaction_id = sorted([(int(''.join(x for x in i.id_ref if x.isdigit())), i.id_ref) for i in rp_pathway.getListOfMembers()], key=lambda tup: tup[0], reverse=True)[0][1]
-        # for reaction_id in [i.getId() for i in self.model.getListOfReactions()]:
+        # for reaction_id in [i.getId() for i in self.getModel().getListOfReactions()]:
         for species_id in set([i.getSpecies() for i in model.getReaction(reaction_id).getListOfReactants()]+[i.getSpecies() for i in model.getReaction(reaction_id).getListOfProducts()]):
             if not rpsbml:
                 isSpePro = self.isSpeciesProduct(species_id, [reaction_id])
@@ -2151,18 +2151,18 @@ class rpSBML:
         #!!!! must be set to false for no apparent reason
         rpSBML._checklibSBML(self.document.setPackageRequired('groups', False), 'enabling groups package')
         ## sbml model
-        self.model = self.document.createModel()
-        rpSBML._checklibSBML(self.model, 'generating the model')
-        rpSBML._checklibSBML(self.model.setId(model_id), 'setting the model ID')
-        model_fbc = self.model.getPlugin('fbc')
+        self.document.createModel()
+        rpSBML._checklibSBML(self.getModel(), 'generating the model')
+        rpSBML._checklibSBML(self.getModel().setId(model_id), 'setting the model ID')
+        model_fbc = self.getModel().getPlugin('fbc')
         model_fbc.setStrict(True)
         if not meta_id:
             meta_id = self._genMetaID(model_id)
-        rpSBML._checklibSBML(self.model.setMetaId(meta_id), 'setting model meta_id')
-        rpSBML._checklibSBML(self.model.setName(name), 'setting model name')
-        rpSBML._checklibSBML(self.model.setTimeUnits('second'), 'setting model time unit')
-        rpSBML._checklibSBML(self.model.setExtentUnits('mole'), 'setting model compartment unit')
-        rpSBML._checklibSBML(self.model.setSubstanceUnits('mole'), 'setting model substance unit')
+        rpSBML._checklibSBML(self.getModel().setMetaId(meta_id), 'setting model meta_id')
+        rpSBML._checklibSBML(self.getModel().setName(name), 'setting model name')
+        rpSBML._checklibSBML(self.getModel().setTimeUnits('second'), 'setting model time unit')
+        rpSBML._checklibSBML(self.getModel().setExtentUnits('mole'), 'setting model compartment unit')
+        rpSBML._checklibSBML(self.getModel().setSubstanceUnits('mole'), 'setting model substance unit')
 
 
     ## Create libSBML compartment
@@ -2175,7 +2175,7 @@ class rpSBML:
     # TODO: set the compName as None by default. To do that you need to regenerate the compXref to
     # use MNX ids as keys instead of the string names
     def createCompartment(self, size, compId, compName, compXref, meta_id=None):
-        comp = self.model.createCompartment()
+        comp = self.getModel().createCompartment()
         rpSBML._checklibSBML(comp, 'create compartment')
         rpSBML._checklibSBML(comp.setId(compId), 'set compartment id')
         if compName:
@@ -2203,7 +2203,7 @@ class rpSBML:
     # @param meta_id meta_id for the unit definition. If None creates a hash from unit_id
     # @return Unit definition
     def createUnitDefinition(self, unit_id, meta_id=None):
-        unitDef = self.model.createUnitDefinition()
+        unitDef = self.getModel().createUnitDefinition()
         rpSBML._checklibSBML(unitDef, 'creating unit definition')
         rpSBML._checklibSBML(unitDef.setId(unit_id), 'setting id')
         if not meta_id:
@@ -2254,10 +2254,10 @@ class rpSBML:
                 param_id = 'B_'+str(round(abs(value), 4)).replace('.', '_')
             else:
                 param_id = 'B__'+str(round(abs(value), 4)).replace('.', '_')
-        if param_id in [i.getId() for i in self.model.getListOfParameters()]:
-            return self.model.getParameter(param_id)
+        if param_id in [i.getId() for i in self.getModel().getListOfParameters()]:
+            return self.getModel().getParameter(param_id)
         else:
-            newParam = self.model.createParameter()
+            newParam = self.getModel().createParameter()
             rpSBML._checklibSBML(newParam, 'Creating a new parameter object')
             rpSBML._checklibSBML(newParam.setConstant(is_constant), 'setting as constant')
             rpSBML._checklibSBML(newParam.setId(param_id), 'setting ID')
@@ -2297,7 +2297,7 @@ class rpSBML:
                        reacXref={},
                        pathway_id=None,
                        meta_id=None):
-        reac = self.model.createReaction()
+        reac = self.getModel().createReaction()
         rpSBML._checklibSBML(reac, 'create reaction')
         ################ FBC ####################
         reac_fbc = reac.getPlugin('fbc')
@@ -2352,7 +2352,7 @@ class rpSBML:
             # self.addUpdateBRSynthList(reac, 'rule_ori_reac', step['rule_ori_reac'], True, False, meta_id)
             # sbase_obj, annot_header, value, units=None, isAlone=False, isList=False, isSort=True, meta_id=None)
         if step['rule_score']:
-            self.rules_scores = (self.rules_scores[0]+step['rule_score'], self.rules_scores[1]+1)
+            self.add_rule_score(step['rule_score'])
             self.addUpdateBRSynth(reac, 'rule_score', step['rule_score'], None, False, False, False, meta_id)
         if step['path_id']:
             self.addUpdateBRSynth(reac, 'path_id', step['path_id'], None, False, False, False, meta_id)
@@ -2362,7 +2362,7 @@ class rpSBML:
             self.addUpdateBRSynth(reac, 'sub_step_id', step['sub_step'], None, False, False, False, meta_id)
         #### GROUPS #####
         if pathway_id:
-            groups_plugin = self.model.getPlugin('groups')
+            groups_plugin = self.getModel().getPlugin('groups')
             hetero_group = groups_plugin.getGroup(pathway_id)
             if not hetero_group:
                 logging.warning('The pathway_id '+str(pathway_id)+' does not exist in the model')
@@ -2400,7 +2400,7 @@ class rpSBML:
                       # TODO: add these at some point -- not very important
                       # charge=0,
                       # chemForm=''):
-        spe = self.model.createSpecies()
+        spe = self.getModel().createSpecies()
         rpSBML._checklibSBML(spe, 'create species')
         ##### FBC #####
         spe_fbc = spe.getPlugin('fbc')
@@ -2445,7 +2445,7 @@ class rpSBML:
         #### GROUPS #####
         # TODO: check that it actually exists
         if species_group_id:
-            groups_plugin = self.model.getPlugin('groups')
+            groups_plugin = self.getModel().getPlugin('groups')
             hetero_group = groups_plugin.getGroup(species_group_id)
             if not hetero_group:
                 logging.warning('The species_group_id '+str(species_group_id)+' does not exist in the model')
@@ -2458,7 +2458,7 @@ class rpSBML:
         # add the species to the sink species
         # logging.debug('in_sink_group_id: '+str(in_sink_group_id))
         if in_sink_group_id:
-            groups_plugin = self.model.getPlugin('groups')
+            groups_plugin = self.getModel().getPlugin('groups')
             sink_group = groups_plugin.getGroup(in_sink_group_id)
             if not sink_group:
                 logging.warning('The species_group_id '+str(in_sink_group_id)+' does not exist in the model')
@@ -2482,7 +2482,7 @@ class rpSBML:
     # @param reaction_smiles String smiles description of this reaction (added in BRSYNTH annotation)
     # @return hetero_group The number libSBML groups object to pass to createReaction to categorise the new reactions
     def createPathway(self, pathway_id, meta_id=None):
-        groups_plugin = self.model.getPlugin('groups')
+        groups_plugin = self.getModel().getPlugin('groups')
         new_group = groups_plugin.createGroup()
         new_group.setId(pathway_id)
         if not meta_id:
@@ -2503,7 +2503,7 @@ class rpSBML:
     def createGene(self, reac, step_id, meta_id=None):
         # TODO: pass this function to Pablo for him to fill with parameters that are appropriate for his needs
         geneName = 'RP'+str(step_id)+'_gene'
-        fbc_plugin = self.model.getPlugin('fbc')
+        fbc_plugin = self.getModel().getPlugin('fbc')
         # fbc_plugin = reac.getPlugin("fbc")
         gp = fbc_plugin.createGeneProduct()
         gp.setId(geneName)
@@ -2529,7 +2529,7 @@ class rpSBML:
     # @param meta_id Set the meta_id
     # @return Boolean exit code
     def createFluxObj(self, fluxobj_id, reactionName, coefficient, isMax=True, meta_id=None):
-        fbc_plugin = self.model.getPlugin('fbc')
+        fbc_plugin = self.getModel().getPlugin('fbc')
         target_obj = fbc_plugin.createObjective()
         # TODO: need to define inpiut metaID
         target_obj.setAnnotation(self._defaultBRSynthAnnot(meta_id))
@@ -2563,7 +2563,7 @@ class rpSBML:
         if not len(reactionNames)==len(coefficients):
             logging.error('The size of reactionNames is not the same as coefficients')
             return False
-        fbc_plugin = self.model.getPlugin('fbc')
+        fbc_plugin = self.getModel().getPlugin('fbc')
         target_obj = fbc_plugin.createObjective()
         target_obj.setAnnotation(self._defaultBRSynthAnnot(meta_id))
         target_obj.setId(fluxobj_id)
