@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from sys      import argv
-from .rpCache import rpCache
-from .rpCache import add_arguments as rpCache_add_args
+from brs_libs.rpCache import rpCache
+from brs_libs.rpCache import add_arguments as rpCache_add_args
 from argparse import ArgumentParser as argparse_ArgParser
 
 def gen_cache(outdir):
