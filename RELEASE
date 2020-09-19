@@ -1,3 +1,7 @@
+0.1.5 - Sep 19, 2020
+    - rename src folder
+    - absolute imports
+
 0.1.5 - Sep 16, 2020
     - replace self.model by self.document.getModel()
     - optimize score handling
