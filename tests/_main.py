@@ -13,15 +13,15 @@ from os import stat as os_stat
 class Main(TestCase):
     __test__ = False
 
-    def test(self):
-        # print(self.__class__.__name__)
-        if self.__class__.__name__ == 'Main':
-            self.skipTest('Generic Class')
-        else:
-            self._preexec  ()
-            self._run      ()
-            self._postexec ()
-            self._check    ()
+    # def test(self):
+    #     # print(self.__class__.__name__)
+    #     if self.__class__.__name__ == 'Main':
+    #         self.skipTest('Generic Class')
+    #     else:
+    #         self._preexec  ()
+    #         self._run      ()
+    #         self._postexec ()
+    #         self._check    ()
 
     def _preexec(self):
         pass
