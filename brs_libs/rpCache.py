@@ -71,19 +71,44 @@ class rpCache:
             'rxn_recipes.tsv.gz':  'dc0624f5ed7ab0b691d9a6ba02571a5cf334cfdb3109e78c98708e31574c46aeac2a97e9433788d80490ff80337679ccfd706cbb8e71a11cdc6122573bb69b0f'
             }
 
-    _attributes = [
-            'deprecatedCID_cid',
-            'deprecatedRID_rid',
-            'cid_strc',
-            'cid_xref',
-            'chebi_cid',
-            'rr_reactions',
-            'inchikey_cid',
-            'comp_xref',
-            'deprecatedCompID_compid',
-            'rr_full_reactions',
-            'cid_name'
-    ]
+    # Attributes with dependencies (other attributes + input_cache files)
+    __attributes = {
+            'deprecatedCID_cid': {'attr_deps': [],
+                                  'file_deps': ['chem_xref.tsv.gz']},
+
+            'deprecatedRID_rid': {'attr_deps': [],
+                                  'file_deps': []},
+
+            'cid_strc': {'attr_deps': ['deprecatedCID_cid'],
+                         'file_deps': ['compounds.tsv.gz', 'chem_prop.tsv.gz']},
+
+            'cid_name': {'attr_deps': ['deprecatedCID_cid'],
+                         'file_deps': ['compounds.tsv.gz', 'chem_prop.tsv.gz']},
+
+            'cid_xref': {'attr_deps': ['deprecatedCID_cid'],
+                         'file_deps': []},
+
+            'chebi_cid': {'attr_deps': ['cid_xref'],
+                          'file_deps': []},
+
+            'rr_reactions': {'attr_deps': ['deprecatedCID_cid', 'deprecatedRID_rid'],
+                             'file_deps': ['retrorules_rr02_flat_all.tsv.gz']},
+
+            'inchikey_cid': {'attr_deps': ['cid_strc'],
+                             'file_deps': []},
+
+            'comp_xref': {'attr_deps': [],
+                          'file_deps': ['comp_xref.tsv.gz']},
+
+            'deprecatedCompID_compid': {'attr_deps': [],
+                                        'file_deps': ['comp_xref.tsv.gz']},
+
+            'rr_full_reactions': {'attr_deps': ['deprecatedCID_cid', 'deprecatedRID_rid'],
+                                  'file_deps': ['rxn_recipes.tsv.gz']},
+    }
+
+    _attributes = list(__attributes.keys())
+
 
     # name: sha512sum
     _cache_files = {
@@ -110,10 +135,13 @@ class rpCache:
     #
     # @param self The object pointer
     # @param db Mode of storing objects ('file' or 'redis')
-    def __init__(self, db='file'):
+    def __init__(self, db='file', attrs=''):
 
         self.store_mode = db
         rpCache._db_timeout = 10
+
+        if attrs:
+            rpCache._attributes = attrs
 
         self.dirname = os_path.dirname(os_path.abspath( __file__ ))#+"/.."
         # input_cache
@@ -126,56 +154,60 @@ class rpCache:
             if not wait_for_redis(self.redis, self._db_timeout):
                 rpCache.logger.critical("Database "+self.store_mode+" is not reachable")
                 exit()
-            self.cid_name                = CRedisDict('cid_name', self.redis)
-            self.deprecatedCID_cid       = CRedisDict('deprecatedCID_cid', self.redis)
-            self.deprecatedRID_rid       = CRedisDict('deprecatedRID_rid', self.redis)
-            self.cid_strc                = CRedisDict('cid_strc', self.redis)
-            self.cid_xref                = CRedisDict('cid_xref', self.redis)
-            self.rr_reactions            = CRedisDict('rr_reactions', self.redis)
-            self.chebi_cid               = CRedisDict('chebi_cid', self.redis)
-            ########## rpReader attributes ###########
-            self.inchikey_cid            = CRedisDict('inchikey_cid', self.redis)
-            self.comp_xref               = CRedisDict('comp_xref', self.redis)
-            self.deprecatedCompID_compid = CRedisDict('deprecatedCompID_compid', self.redis)
-            ########## rpCofactors attributes ##########
-            self.rr_full_reactions       = CRedisDict('rr_full_reactions', self.redis)
+            for attr in rpCache._attributes:
+                setattr(self, attr, CRedisDict(attr, self.redis))
+            # self.cid_name                = CRedisDict('cid_name', self.redis)
+            # self.deprecatedCID_cid       = CRedisDict('deprecatedCID_cid', self.redis)
+            # self.deprecatedRID_rid       = CRedisDict('deprecatedRID_rid', self.redis)
+            # self.cid_strc                = CRedisDict('cid_strc', self.redis)
+            # self.cid_xref                = CRedisDict('cid_xref', self.redis)
+            # self.rr_reactions            = CRedisDict('rr_reactions', self.redis)
+            # self.chebi_cid               = CRedisDict('chebi_cid', self.redis)
+            # ########## rpReader attributes ###########
+            # self.inchikey_cid            = CRedisDict('inchikey_cid', self.redis)
+            # self.comp_xref               = CRedisDict('comp_xref', self.redis)
+            # self.deprecatedCompID_compid = CRedisDict('deprecatedCompID_compid', self.redis)
+            # ########## rpCofactors attributes ##########
+            # self.rr_full_reactions       = CRedisDict('rr_full_reactions', self.redis)
         else:
-            self.cid_name                = None
-            self.deprecatedCID_cid       = None
-            self.deprecatedRID_rid       = None
-            self.cid_strc                = None
-            self.cid_xref                = None
-            self.rr_reactions            = None
-            self.chebi_cid               = None
-            # rpReader attributes
-            self.inchikey_cid            = None
-            self.comp_xref               = None
-            self.deprecatedCompID_compid = None
-            # rpCofactors attributes
-            self.rr_full_reactions       = None
+            for attr in rpCache._attributes:
+                setattr(self, attr, None)
+            # self.cid_name                = None
+            # self.deprecatedCID_cid       = None
+            # self.deprecatedRID_rid       = None
+            # self.cid_strc                = None
+            # self.cid_xref                = None
+            # self.rr_reactions            = None
+            # self.chebi_cid               = None
+            # # rpReader attributes
+            # self.inchikey_cid            = None
+            # self.comp_xref               = None
+            # self.deprecatedCompID_compid = None
+            # # rpCofactors attributes
+            # self.rr_full_reactions       = None
 
         try:
             if self.store_mode=='file':
-                self._check_or_load_cache_in_memory(self._cache_dir)
+                self._check_or_load_cache_in_memory()
             else:
-                self._check_or_load_cache_in_db(self._cache_dir)
+                self._check_or_load_cache_in_db()
         except FileNotFoundError:
             print_FAILED()
             try:
                 rpCache._check_or_download_cache_to_disk(self._cache_dir)
                 if self.store_mode=='file':
-                    self._check_or_load_cache_in_memory(self._cache_dir)
+                    self._check_or_load_cache_in_memory()
                 else:
-                    self._check_or_load_cache_in_db(self._cache_dir)
+                    self._check_or_load_cache_in_db()
             except (r_exceptions.RequestException,
                     r_exceptions.InvalidSchema,
                     r_exceptions.ConnectionError):
                 print_FAILED()
                 rpCache.generate_cache(self._cache_dir)
                 if self.store_mode=='file':
-                    self._check_or_load_cache_in_memory(self._cache_dir)
+                    self._check_or_load_cache_in_memory()
                 else:
-                    self._check_or_load_cache_in_db(self._cache_dir)
+                    self._check_or_load_cache_in_db()
 
 
     #####################################################
@@ -388,7 +420,7 @@ class rpCache:
         else:
             print("   Cache file already exists", end = '', flush=True)
             print_OK()
-        return deprecatedCID_cid
+        # return deprecatedCID_cid
 
 
     @staticmethod
@@ -461,12 +493,12 @@ class rpCache:
                 print_OK(end_time-start_time)
 
 
-    def _check_or_load_cache_in_memory(self, cache_dir):
-        for attribute in rpCache._attributes:
+    def _check_or_load_cache_in_memory(self):
+        for attribute in self._attributes:
             if not getattr(self, attribute):
                 filename = attribute+rpCache._ext
                 print("Loading "+filename+"...", end = '', flush=True)
-                data = self._load_cache_from_file(cache_dir+filename)
+                data = self._load_cache_from_file(self._cache_dir+filename)
                 print_OK()
                 setattr(self, attribute, data)
             else:
@@ -474,12 +506,12 @@ class rpCache:
                 print_OK()
 
 
-    def _check_or_load_cache_in_db(self, cache_dir):
-        for attribute in rpCache._attributes:
+    def _check_or_load_cache_in_db(self):
+        for attribute in self._attributes:
             if not CRedisDict.exists(self.redis, attribute):
                 filename = attribute+rpCache._ext
                 print("Loading "+filename+"...", end = '', flush=True)
-                data = self._load_cache_from_file(cache_dir+filename)
+                data = self._load_cache_from_file(self._cache_dir+filename)
                 print_OK()
                 self._store_cache_to_db(attribute, data)
             else:
