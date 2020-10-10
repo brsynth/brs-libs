@@ -156,35 +156,9 @@ class rpCache:
                 exit()
             for attr in rpCache._attributes:
                 setattr(self, attr, CRedisDict(attr, self.redis))
-            # self.cid_name                = CRedisDict('cid_name', self.redis)
-            # self.deprecatedCID_cid       = CRedisDict('deprecatedCID_cid', self.redis)
-            # self.deprecatedRID_rid       = CRedisDict('deprecatedRID_rid', self.redis)
-            # self.cid_strc                = CRedisDict('cid_strc', self.redis)
-            # self.cid_xref                = CRedisDict('cid_xref', self.redis)
-            # self.rr_reactions            = CRedisDict('rr_reactions', self.redis)
-            # self.chebi_cid               = CRedisDict('chebi_cid', self.redis)
-            # ########## rpReader attributes ###########
-            # self.inchikey_cid            = CRedisDict('inchikey_cid', self.redis)
-            # self.comp_xref               = CRedisDict('comp_xref', self.redis)
-            # self.deprecatedCompID_compid = CRedisDict('deprecatedCompID_compid', self.redis)
-            # ########## rpCofactors attributes ##########
-            # self.rr_full_reactions       = CRedisDict('rr_full_reactions', self.redis)
         else:
             for attr in rpCache._attributes:
                 setattr(self, attr, None)
-            # self.cid_name                = None
-            # self.deprecatedCID_cid       = None
-            # self.deprecatedRID_rid       = None
-            # self.cid_strc                = None
-            # self.cid_xref                = None
-            # self.rr_reactions            = None
-            # self.chebi_cid               = None
-            # # rpReader attributes
-            # self.inchikey_cid            = None
-            # self.comp_xref               = None
-            # self.deprecatedCompID_compid = None
-            # # rpCofactors attributes
-            # self.rr_full_reactions       = None
 
         try:
             if self.store_mode=='file':
@@ -256,7 +230,7 @@ class rpCache:
         rpCache._gen_chebi_cid(input_dir, outdir, cid_xref)
         del cid_xref
         deprecatedRID_rid = rpCache._gen_deprecatedRID_rid(input_dir, outdir)
-        deprecatedCID_cid = rpCache._gen_rr_reactions(input_dir, outdir, deprecatedCID_cid, deprecatedRID_rid)
+        rpCache._gen_rr_reactions(input_dir, outdir, deprecatedCID_cid, deprecatedRID_rid)
         rpCache._gen_comp_xref_deprecatedCompID_compid(input_dir, outdir)
         rpCache._gen_rr_full_reactions(input_dir, outdir, deprecatedCID_cid, deprecatedRID_rid)
         del deprecatedCID_cid, deprecatedRID_rid
@@ -291,7 +265,7 @@ class rpCache:
         f_cid_strc = outdir+'cid_strc'+rpCache._ext
         f_cid_name = outdir+'cid_name'+rpCache._ext
         if not os_path.isfile(f_cid_strc):
-            if not deprecatedCID_cid:
+            if not deprecatedCID_cid['attr']:
                 print("   Loading input data from file...", end = '', flush=True)
                 deprecatedCID_cid = rpCache._load_cache_from_file(deprecatedCID_cid['file'])
                 print_OK()
@@ -455,7 +429,7 @@ class rpCache:
         f_rr_full_reactions = outdir+attribute+rpCache._ext
         if not os_path.isfile(f_rr_full_reactions):
             print("   Generating data...", end = '', flush=True)
-            if not deprecatedCID_cid:
+            if not deprecatedCID_cid['attr']:
                 print("   Loading input data from file...", end = '', flush=True)
                 deprecatedCID_cid = rpCache._load_cache_from_file(deprecatedCID_cid['file'])
                 print_OK()
