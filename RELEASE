@@ -1,3 +1,7 @@
+0.2.0 - Oct 10, 2020
+    - possibility to choose which attribute(s) to load when instantiate new rpCache
+    - add related tests
+
 0.1.6 - Sep 19, 2020
     - rename src folder
     - absolute imports
