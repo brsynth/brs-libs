@@ -56,10 +56,7 @@ jobs:
       run: |
         conda config \
           --add channels brsynth \
-          --add channels sbmlteam \
-          --add channels anaconda \
-          --add channels conda-forge \
-          --add channels rdkit
+          --add channels conda-forge
     - name: Build for Python ${{ matrix.python-version }}
       run: |
         conda-build --python ${{ matrix.python-version }} brs_libs
