@@ -10,7 +10,7 @@ from brs_utils import extract_gz
 from os        import remove as os_rm
 
 
-class Test_File(Main):
+class Test_rpCache(Main):
     __test__ = True
 
     def test_single_attr_db(self):
