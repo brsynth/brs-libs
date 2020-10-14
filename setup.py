@@ -30,13 +30,8 @@ from sys import argv as sys_argv
 if 'conda' in sys_argv:
     required += ['rdkit']
 
-
 _release = 'RELEASE'
-# extra_files={
-#     'release': (_package, [_package+'/doc/'+_release])
-# }
 
-# with open(extra_files['release'][1][0], 'r') as f:
 with open(_release, 'r') as f:
     _version = f.readline().split()[0]
 
