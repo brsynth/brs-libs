@@ -6,7 +6,7 @@ name: Check code
 on:
 
   push:
-    branches: [ dev, master ]
+    branches: [ dev, master, main ]
     paths:
       - 'brs_libs/*'
   pull_request:
