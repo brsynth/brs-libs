@@ -9,10 +9,10 @@ Libraries for rpTools:
 ## rpSBML
 Defines SBML structure with additional fields relative to [RetroPath2](https://github.com/brsynth/RetroPath2-wrapper) objects.
 
-### Prerequisites
+<!-- ### Prerequisites
 * Python 3 with the following modules:
     * python-libsbml
-* [RDKit](https://www.RDKit.org)
+    * [RDKit](https://www.RDKit.org) -->
 
 
 ## rpCache
@@ -27,20 +27,49 @@ In order to save memory space, cache data can be loaded once in a database (redi
 
 
 ### Install
+#### From pip
 rpCompletion requires [RDKit](https://www.RDKit.org) which is not available through pip. It can be installed through Conda:
 ```sh
-[sudo] conda install -c rdkit rdkit
+[sudo] conda install -c conda-forge rdkit
 ```
-#### From pip
+Then, install `brs_libs`:
 ```sh
 [sudo] python -m pip install brs_libs
 ```
 #### From Conda
 ```sh
-[sudo] conda install -c brsynth brs_libs
+[sudo] conda install -c brsynth -c conda-forge brs_libs
 ```
 
-### Run
+### Use
+
+#### Load rpCache in memory
+**Full cache into files**
+```python
+from brs_libs import rpCache
+
+rpcache = rpCache(db='file')
+print(rpcache.cid_src)
+```
+
+**Full cache into Redis DB**
+For multiple instances of rpCache simultaneously, rpCache can be loaded into one single Redis database:
+```python
+from brs_libs import rpCache
+
+rpcache = rpCache(db='localhost')
+print(rpcache.cid_src)
+```
+`localhost` means that rpCache will look for a redis database locally. If there is not, it will start a brand new redis server. `localhost` could be replaced by any hostname that hosts the Redis database.
+
+**A part of cache**
+For less loading time and memory footprint, a part of the cache can be loaded:
+```python
+from brs_libs import rpCache
+
+rpcache = rpCache(attrs='cid_strc')
+print(rpcache.cid_src)
+```
 
 #### (Re-)generate the cache
 **From Python code**
@@ -51,7 +80,6 @@ rpCache.generate_cache(outdir)
 ```
 
 **From CLI**
-
 After having installed brs_libs Python module:
 ```sh
 python -m brs_libs --gen_cache <folder>
@@ -59,7 +87,7 @@ python -m brs_libs --gen_cache <folder>
 
 
 ### Test
-Tests can be runned. To do so, please follow insructions below:
+Please follow instructions below ti run tests:
 ```
 cd tests
 ./test-in-docker.sh
