@@ -17,13 +17,13 @@ class Test_rpCache(Main):
         rpcache = rpCache('localhost')
         for attr,length in self.attributes:
             with self.subTest(attr=attr, length=length):
-                self.assertEqual(len(getattr(rpcache, attr)), length)
+                self.assertEqual(len(rpcache.get(attr)), length)
 
     def test_single_attr_file(self):
         rpcache = rpCache('file')
         for attr,length in self.attributes:
             with self.subTest(attr=attr, length=length):
-                self.assertEqual(len(getattr(rpcache, attr)), length)
+                self.assertEqual(len(rpcache.get(attr)), length)
 
     def test_generate_cache(self):
         rpCache.generate_cache(self.outdir)
