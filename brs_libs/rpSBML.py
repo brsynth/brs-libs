@@ -63,6 +63,7 @@ class rpSBML:
         return self.document.getModel()
 
     def compute_score(self, pathway_id='rp_pathway'):
+        self.score['value'] = 0
         for member in self.readRPpathwayIDs(pathway_id):
             reaction = self.getModel().getReaction(member)
             self.add_rule_score(float(reaction.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild('rule_score').getAttrValue('value')))
