@@ -52,7 +52,6 @@ class rpSBML:
         if inFile:
             try:
                 self.readSBML(inFile)
-                self.compute_score()
             except FileNotFoundError as e:
                 print(e)
 
@@ -67,6 +66,10 @@ class rpSBML:
         for member in self.readRPpathwayIDs(pathway_id):
             reaction = self.getModel().getReaction(member)
             self.add_rule_score(float(reaction.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild('rule_score').getAttrValue('value')))
+        return self.getScore()
+
+    def getScore(self):
+        return self.score
 
     def add_rule_score(self, score):
         self.score['value']    += score
