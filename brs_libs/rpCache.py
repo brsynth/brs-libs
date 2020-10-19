@@ -44,7 +44,7 @@ def build_parser():
 class rpCache:
 
     logger = logging_getLogger(__name__)
-    logger.info('Started instance of rpCache')
+    # logger.info('Started instance of rpCache')
 
     # _input_cache_url = 'ftp://ftp.vital-it.ch/databases/metanetx/MNXref/3.2/'
     _cache_url       = 'https://gitlab.com/breakthewall/rpcache-data/-/raw/master/'
@@ -183,6 +183,9 @@ class rpCache:
                 else:
                     self._check_or_load_cache_in_db()
 
+
+    def get(self, attr):
+        return getattr(self, attr)
 
     #####################################################
     ################# ERROR functions ###################
