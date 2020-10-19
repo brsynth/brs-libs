@@ -1,7 +1,13 @@
+0.3.0 - Oct 10, 2020
+    - add inchikeyMIRIAM class
+    - remove score computation from rpSBML.__init__(). Needs to call compute_score() when needed
+    - fix score initialisation before computing it
+    - choose pure conda to build test environment
+    - add 'doc' folder
+
 0.2.0 - Oct 10, 2020
     - possibility to choose which attribute(s) to load when instantiate new rpCache
     - add related tests
-
 
 0.1.6 - Sep 19, 2020
     - rename src folder
