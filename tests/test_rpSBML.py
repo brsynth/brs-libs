@@ -15,6 +15,11 @@ class Test_rpSBML(TestCase):
     def test_initEmpty(self):
         rpsbml = rpSBML('rpSBML_test')
 
+    def test_score(self):
+        rpsbml = rpSBML('rp_1_11', inFile='data/rp_1_11_sbml.xml')
+        rpsbml.compute_score()
+        self.assertEqual(rpsbml.getScore(), 0.6194499694153365)
+
     def test_print_rpSBML(self):
         name = 'rpSBML_test'
         rpsbml = rpSBML(name)
