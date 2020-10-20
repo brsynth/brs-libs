@@ -69,6 +69,13 @@ class rpSBML:
             self.add_rule_score(float(reaction.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild('rule_score').getAttrValue('value')))
         return self.getScore()
 
+    def getScore(self):
+        try:
+            return self.score['value'] / self.score['nb_rules']
+        except ZeroDivisionError as e:
+            logging.error(e)
+            return -1
+
     def add_rule_score(self, score):
         self.score['value']    += score
         self.score['nb_rules'] += 1
@@ -1026,13 +1033,6 @@ class rpSBML:
              + 'score: '     + str(self.getScore()) + '\n' \
              + 'document: '  + str(self.document)   + '\n' \
              + 'model: '     + str(self.getModel())      + '\n'
-
-    def getScore(self):
-        try:
-            return self.score['value'] / self.score['nb_rules']
-        except ZeroDivisionError as e:
-            logging.error(e)
-            return -1
 
     #######################################################################
     ############################# PRIVATE FUNCTIONS #######################
