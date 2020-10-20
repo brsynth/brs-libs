@@ -3,8 +3,9 @@
 [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/latest_release_date.svg)](https://anaconda.org/brsynth/brs_libs) [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/version.svg)](https://anaconda.org/brsynth/brs_libs)
 
 Libraries for rpTools:
-* rpCache
 * rpSBML
+* rpCache
+* inchikeyMIRIAM
 
 ## rpSBML
 Defines SBML structure with additional fields relative to [RetroPath2](https://github.com/brsynth/RetroPath2-wrapper) objects.
@@ -13,7 +14,6 @@ Defines SBML structure with additional fields relative to [RetroPath2](https://g
 * Python 3 with the following modules:
     * python-libsbml
     * [RDKit](https://www.RDKit.org) -->
-
 
 ## rpCache
 
@@ -92,6 +92,10 @@ Please follow instructions below ti run tests:
 cd tests
 ./test-in-docker.sh
 ```
+
+## inchikeyMIRIAM
+Uses the rpCache to parse an SBML file to find all the chemical species, and try to recover the inchikey and add it to the MIRIAM annotation.
+
 
 
 ## Authors
