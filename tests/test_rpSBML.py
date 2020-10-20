@@ -5,7 +5,6 @@ Created on June 17 2020
 """
 
 from unittest import TestCase
-
 from brs_libs import rpSBML
 
 # Cette classe est un groupe de tests. Son nom DOIT commencer
