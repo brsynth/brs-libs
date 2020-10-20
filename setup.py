@@ -1,10 +1,16 @@
 from setuptools import setup
 
-
 _readme = 'README.md'
 
-_extras_path = 'extras'
+with open(_readme, 'r') as f:
+    long_description = f.read()
 
+_release = 'RELEASE'
+
+with open(_release, 'r') as f:
+    _version = f.readline().split()[0]
+
+_extras_path = 'extras'
 with open(_extras_path+'/.env', 'r') as f:
     for line in f:
         if line.startswith('PACKAGE='):
@@ -18,42 +24,36 @@ with open(_extras_path+'/.env', 'r') as f:
         if line.startswith('CORR_AUTHOR='):
             _corr_author = line.splitlines()[0].split('=')[1].lower()
 
-with open(_readme, 'r') as f:
-    long_description = f.read()
-
-required = []
-with open(_extras_path+'/requirements.txt', 'r') as f:
-    required = [line.splitlines()[0] for line in f]
-
-# hack to handle diff between pip and conda package name
-from sys import argv as sys_argv
-if 'conda' in sys_argv:
-    required += ['rdkit']
-
-_release = 'RELEASE'
-
-with open(_release, 'r') as f:
-    _version = f.readline().split()[0]
+# from yaml import safe_load as yaml_safe_load
+# from yaml import YAMLError
+# required = []
+# with open(_extras_path+'/environment-run.yml', 'r') as run_stream:
+# # with open(_extras_path+'/environment-build.yml', 'r') as build_stream:
+#     try:
+#         required = yaml_safe_load(run_stream)['dependencies']
+#         # required += yaml_safe_load(build_stream)['dependencies']
+#     except yaml.YAMLError as exc:
+#         print(exc)
 
 setup(
-    name=_package,
-    version=_version,
-    author=_authors,
-    author_email=_corr_author,
-    description=_descr,
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url=_url,
-    packages=[_package],
-    package_dir={_package: _package},
-    include_package_data=True,
-    install_requires=required,
-    test_suite='pytest',
-    license='MIT',
+    name                          = _package,
+    version                       = _version,
+    author                        = _authors,
+    author_email                  = _corr_author,
+    description                   = _descr,
+    long_description              = long_description,
+    long_description_content_type = 'text/markdown',
+    url                           = _url,
+    packages                      = [_package],
+    package_dir                   = {_package: _package},
+    include_package_data          = True,
+    # install_requires              = required,
+    test_suite                    = 'pytest',
+    license                       = 'MIT',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
-    python_requires='>=3.5',
+    python_requires               = '>=3.5',
 )
