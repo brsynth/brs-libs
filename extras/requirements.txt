@@ -1,8 +1,0 @@
-python-libsbml
-numpy
-pandas
-brs_utils
-credisdict
-redis
-requests
-colored
