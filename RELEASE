@@ -4,6 +4,8 @@
     - fix score initialisation before computing it
     - choose pure conda to build test environment
     - add 'doc' folder
+    - fix rpCache '_attributes' non-static call
+    - switch to pure conda test environments
 
 0.2.0 - Oct 10, 2020
     - possibility to choose which attribute(s) to load when instantiate new rpCache
