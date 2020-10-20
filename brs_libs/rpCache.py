@@ -225,14 +225,14 @@ class rpCache:
             rpCache._download_input_cache(url, file, input_dir)
 
         # GENERATE CACHE FILES AND STORE THEM TO DISK
-        deprecatedCID_cid = rpCache._gen_deprecatedCID_cid(input_dir, outdir)
-        cid_strc          = rpCache._gen_cid_strc_cid_name(input_dir, outdir, deprecatedCID_cid)
+        deprecatedCID_cid  = rpCache._gen_deprecatedCID_cid(input_dir, outdir)
+        cid_strc, cid_name = rpCache._gen_cid_strc_cid_name(input_dir, outdir, deprecatedCID_cid)
         rpCache._gen_inchikey_cid(input_dir, outdir, cid_strc)
-        del cid_strc
-        cid_xref          = rpCache._gen_cid_xref(input_dir, outdir, deprecatedCID_cid)
+        del cid_strc, cid_name
+        cid_xref           = rpCache._gen_cid_xref(input_dir, outdir, deprecatedCID_cid)
         rpCache._gen_chebi_cid(input_dir, outdir, cid_xref)
         del cid_xref
-        deprecatedRID_rid = rpCache._gen_deprecatedRID_rid(input_dir, outdir)
+        deprecatedRID_rid  = rpCache._gen_deprecatedRID_rid(input_dir, outdir)
         rpCache._gen_rr_reactions(input_dir, outdir, deprecatedCID_cid, deprecatedRID_rid)
         rpCache._gen_comp_xref_deprecatedCompID_compid(input_dir, outdir)
         rpCache._gen_rr_full_reactions(input_dir, outdir, deprecatedCID_cid, deprecatedRID_rid)
@@ -283,7 +283,7 @@ class rpCache:
             cid_strc = rpCache._load_cache_from_file(f_cid_strc)
             print("   Cache file already exists", end = '', flush=True)
             print_OK()
-        return {'attr': cid_strc, 'file': f_cid_strc}
+        return {'attr': cid_strc, 'file': f_cid_strc}, {'attr': cid_name, 'file': f_cid_name}
 
 
     @staticmethod
@@ -470,14 +470,18 @@ class rpCache:
                 print_OK(end_time-start_time)
 
 
+    def _load_from_file(self, attribute):
+        filename = attribute+rpCache._ext
+        print("Loading "+filename+"...", end = '', flush=True)
+        data = self._load_cache_from_file(self._cache_dir+filename)
+        print_OK()
+        return data
+
+
     def _check_or_load_cache_in_memory(self):
         for attribute in self._attributes:
             if not getattr(self, attribute):
-                filename = attribute+rpCache._ext
-                print("Loading "+filename+"...", end = '', flush=True)
-                data = self._load_cache_from_file(self._cache_dir+filename)
-                print_OK()
-                setattr(self, attribute, data)
+                setattr(self, attribute, self._load_from_file(attribute))
             else:
                 print(attribute+" already loaded in memory...", end = '', flush=True)
                 print_OK()
@@ -486,11 +490,7 @@ class rpCache:
     def _check_or_load_cache_in_db(self):
         for attribute in self._attributes:
             if not CRedisDict.exists(self.redis, attribute):
-                filename = attribute+rpCache._ext
-                print("Loading "+filename+"...", end = '', flush=True)
-                data = self._load_cache_from_file(self._cache_dir+filename)
-                print_OK()
-                self._store_cache_to_db(attribute, data)
+                self._store_cache_to_db(attribute, self._load_from_file(attribute))
             else:
                 print(attribute+" already loaded in db...", end = '', flush=True)
                 print_OK()
