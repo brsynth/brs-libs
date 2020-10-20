@@ -1,4 +1,7 @@
-0.3.0 - Oct 10, 2020
+0.3.1 - Oct 20, 2020
+    - switch to pure conda packaging
+
+0.3.0 - Oct 20, 2020
     - add inchikeyMIRIAM class
     - remove score computation from rpSBML.__init__(). Needs to call compute_score() when needed
     - fix score initialisation before computing it
