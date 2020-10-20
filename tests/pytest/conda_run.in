@@ -1,9 +1,0 @@
-conda-forge::python-libsbml
-conda-forge::numpy
-conda-forge::pandas
-conda-forge::requests
-conda-forge::colored
-conda-forge::redis-py
-conda-forge::rdkit==2020.03.6
-brsynth::brs_utils
-brsynth::credisdict
