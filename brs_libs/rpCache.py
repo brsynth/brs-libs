@@ -141,7 +141,7 @@ class rpCache:
         rpCache._db_timeout = 10
 
         if attrs:
-            rpCache._attributes = attrs
+            self._attributes = attrs
 
         self.dirname = os_path.dirname(os_path.abspath( __file__ ))#+"/.."
         # input_cache
@@ -154,34 +154,25 @@ class rpCache:
             if not wait_for_redis(self.redis, self._db_timeout):
                 rpCache.logger.critical("Database "+self.store_mode+" is not reachable")
                 exit()
-            for attr in rpCache._attributes:
+            for attr in self._attributes:
                 setattr(self, attr, CRedisDict(attr, self.redis))
         else:
-            for attr in rpCache._attributes:
+            for attr in self._attributes:
                 setattr(self, attr, None)
 
         try:
-            if self.store_mode=='file':
-                self._check_or_load_cache_in_memory()
-            else:
-                self._check_or_load_cache_in_db()
+            self._check_or_load_cache()
         except FileNotFoundError:
             print_FAILED()
             try:
-                rpCache._check_or_download_cache_to_disk(self._cache_dir)
-                if self.store_mode=='file':
-                    self._check_or_load_cache_in_memory()
-                else:
-                    self._check_or_load_cache_in_db()
+                rpCache._check_or_download_cache_to_disk(self._cache_dir, self._attributes)
+                self._check_or_load_cache()
             except (r_exceptions.RequestException,
                     r_exceptions.InvalidSchema,
                     r_exceptions.ConnectionError):
                 print_FAILED()
                 rpCache.generate_cache(self._cache_dir)
-                if self.store_mode=='file':
-                    self._check_or_load_cache_in_memory()
-                else:
-                    self._check_or_load_cache_in_db()
+                self._check_or_load_cache()
 
 
     def get(self, attr):
@@ -452,10 +443,10 @@ class rpCache:
 
 
     @staticmethod
-    def _check_or_download_cache_to_disk(cache_dir):
-        for attr in rpCache._attributes:
+    def _check_or_download_cache_to_disk(cache_dir, attributes):
+        for attr in attributes:
             filename = attr+rpCache._ext
-            if os_path.isfile(cache_dir+filename) and sha512(Path(cache_dir+filename).read_bytes()).hexdigest()==rpCache._cache_files[attr]:
+            if os_path.isfile(cache_dir+filename) and sha512(Path(cache_dir+filename).read_bytes()).hexdigest()==rpCache._cache_files[filename]:
                 print(filename+" already downloaded ", end = '', flush=True)
                 print_OK()
             else:
@@ -476,6 +467,13 @@ class rpCache:
         data = self._load_cache_from_file(self._cache_dir+filename)
         print_OK()
         return data
+
+
+    def _check_or_load_cache(self):
+        if self.store_mode=='file':
+            self._check_or_load_cache_in_memory()
+        else:
+            self._check_or_load_cache_in_db()
 
 
     def _check_or_load_cache_in_memory(self):
