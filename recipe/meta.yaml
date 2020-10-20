@@ -26,6 +26,7 @@ requirements:
     - redis
     - requests
     - colored
+    - rdkit==2020.03.6
 
 test:
   source_files:
