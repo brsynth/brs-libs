@@ -1,3 +1,8 @@
+0.4.0 - Oct 21, 2020
+    - publish for python3.9
+    - publish for all platforms
+    - rpSBML.py::writeSBML takes now a filename rather than a folder
+
 0.3.1 - Oct 20, 2020
     - switch to pure conda packaging
 
