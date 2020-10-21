@@ -44,7 +44,6 @@ jobs:
         conda build --test \
           -c brsynth \
           -c conda-forge \
-          -c bioconda \
           ${CONDA_BLD_PATH}/*/brs_libs-*.tar.bz2
 
     - name: Convert to other platforms
