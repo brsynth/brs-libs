@@ -2,7 +2,7 @@
 
 [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/latest_release_date.svg)](https://anaconda.org/brsynth/brs_libs)
 [![Anaconda-Server Badge](https://anaconda.org/brsynth/brs_libs/badges/version.svg)](https://anaconda.org/brsynth/brs_libs)
-![Test (full))](https://github.com/brsynth/brs-libs/workflows/Test%20suite/badge.svg)
+![Test suite)](https://github.com/brsynth/brs-libs/workflows/Test%20suite/badge.svg)
 
 Libraries for rpTools:
 * rpSBML
