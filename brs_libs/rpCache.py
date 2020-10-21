@@ -37,12 +37,12 @@ def build_parser():
     return add_arguments(argparse_ArgParser('Python script to pre-compute data'))
 
 
-## Class to generate the cache
-#
-# Contains all the functions that parse different files, used to calculate the thermodynamics and the FBA of the
-#the other steps. These should be called only when the files have changes
 class rpCache:
+    """Class to generate the cache
 
+    Contains all the functions that parse different files, used to calculate the thermodynamics and the FBA of the the other steps. These should be called only when the files have changes
+
+    """
     logger = logging_getLogger(__name__)
     # logger.info('Started instance of rpCache')
 
@@ -182,16 +182,25 @@ class rpCache:
     ################# ERROR functions ###################
     #####################################################
 
-    ## Error function for the convertion of structures
-    #
     class Error(Exception):
+        """Error function for the convertion of structures
+        """
         pass
 
 
-    ## Error function for the convertion of structures
-    #
     class DepictionError(Error):
+        """Error function for the convertion of structures
+        """
         def __init__(self, message):
+            """Constructor for the class
+
+            :param message: The error handling message string
+
+            :type message: str
+            
+            :rtype: None
+            :return: None
+            """
             #self.expression = expression
             self.message = message
 
