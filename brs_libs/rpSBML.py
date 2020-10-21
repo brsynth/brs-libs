@@ -138,8 +138,8 @@ class rpSBML:
         :return: Tuple of dict where the first entry is the species source to target conversion and the second is the reaction source to target conversion
         :rtype: tuple
         """
-        # target_rpsbml.model = target_document.getModel()
-        # Find the ID's of the similar target_rpsbml.model species
+        #target_rpsbml.model = target_document.getModel()
+        #Find the ID's of the similar target_rpsbml.model species
         ################ MODEL FBC ########################
         if not target_rpsbml.model.isPackageEnabled('fbc'):
             rpSBML._checklibSBML(target_rpsbml.model.enablePackage(
@@ -155,24 +155,24 @@ class rpSBML:
                     'Enabling the FBC package')
         target_fbc = target_rpsbml.model.getPlugin('fbc')
         source_fbc = source_rpsbml.model.getPlugin('fbc')
-        # note sure why one needs to set this as False
+        #note sure why one needs to set this as False
         rpSBML._checklibSBML(source_rpsbml.document.setPackageRequired('fbc', False), 'enabling FBC package')
         ################ UNITDEFINITIONS ######
-        # return the list of unit definitions id's for the target to avoid overwritting
-        # WARNING: this means that the original unit definitions will be prefered over the new one
+        #return the list of unit definitions id's for the target to avoid overwritting
+        #WARNING: this means that the original unit definitions will be prefered over the new one
         target_unitDefID = [i.getId() for i in target_rpsbml.model.getListOfUnitDefinitions()]
         for source_unitDef in source_rpsbml.model.getListOfUnitDefinitions():
-            if not source_unitDef.getId() in target_unitDefID: # have to compare by ID since no annotation
-                # create a new unitDef in the target
+            if not source_unitDef.getId() in target_unitDefID: #have to compare by ID since no annotation
+                #create a new unitDef in the target
                 target_unitDef = target_rpsbml.model.createUnitDefinition()
                 rpSBML._checklibSBML(target_unitDef, 'fetching target unit definition')
-                # copy unitDef info to the target
+                #copy unitDef info to the target
                 rpSBML._checklibSBML(target_unitDef.setId(source_unitDef.getId()),
                     'setting target unit definition ID')
                 rpSBML._checklibSBML(target_unitDef.setAnnotation(source_unitDef.getAnnotation()),
                     'setting target unit definition Annotation')
                 for source_unit in source_unitDef.getListOfUnits():
-                    # copy unit info to the target unitDef
+                    #copy unit info to the target unitDef
                     target_unit = target_unitDef.createUnit()
                     rpSBML._checklibSBML(target_unit, 'creating target unit')
                     rpSBML._checklibSBML(target_unit.setKind(source_unit.getKind()),
@@ -183,10 +183,10 @@ class rpSBML:
                         'setting target unit scale')
                     rpSBML._checklibSBML(target_unit.setMultiplier(source_unit.getMultiplier()),
                         'setting target unit multiplier')
-                target_unitDefID.append(source_unitDef.getId()) # add to the list to make sure its not added twice
+                target_unitDefID.append(source_unitDef.getId()) #add to the list to make sure its not added twice
         ################ COMPARTMENTS ###############
         # Compare by MIRIAM annotations
-        # Note that key is source and value is target conversion
+        #Note that key is source and value is target conversion
         comp_source_target = {}
         for source_compartment in source_rpsbml.model.getListOfCompartments():
             found = False
@@ -195,7 +195,7 @@ class rpSBML:
             if not source_annotation:
                 logging.warning('No annotation for the source of compartment '+str(source_compartment.getId()))
                 continue
-            # compare by MIRIAM first
+            #compare by MIRIAM first
             for target_compartment in target_rpsbml.model.getListOfCompartments():
                 target_annotation = target_compartment.getAnnotation()
                 if not target_annotation:
@@ -206,17 +206,17 @@ class rpSBML:
                     comp_source_target[source_compartment.getId()] = target_compartment.getId()
                     break
             if not found:
-                # if the id is not found, see if the ids already exists
+                #if the id is not found, see if the ids already exists
                 if source_compartment.getId() in target_ids:
                     comp_source_target[source_compartment.getId()] = source_compartment.getId()
                     found = True
-                # if there is not MIRIAM match and the id's differ then add it
+                #if there is not MIRIAM match and the id's differ then add it
                 else:
                     target_compartment = target_rpsbml.model.createCompartment()
                     rpSBML._checklibSBML(target_compartment, 'Creating target compartment')
                     rpSBML._checklibSBML(target_compartment.setMetaId(source_compartment.getMetaId()),
                             'setting target metaId')
-                    # make sure that the ID is different
+                    #make sure that the ID is different
                     if source_compartment.getId()==target_compartment.getId():
                         rpSBML._checklibSBML(target_compartment.setId(source_compartment.getId()+'_sourceModel'),
                                 'setting target id')
@@ -234,10 +234,10 @@ class rpSBML:
                     comp_source_target[target_compartment.getId()] = target_compartment.getId()
         # logging.debug('comp_source_target: '+str(comp_source_target))
         ################ PARAMETERS ###########
-        # WARNING: here we compare by ID
+        #WARNING: here we compare by ID
         targetParametersID = [i.getId() for i in target_rpsbml.model.getListOfParameters()]
         for source_parameter in source_rpsbml.model.getListOfParameters():
-            if source_parameter.getId() not in targetParametersID:
+            if not source_parameter.getId() in targetParametersID:
                 target_parameter = target_rpsbml.model.createParameter()
                 rpSBML._checklibSBML(target_parameter, 'creating target parameter')
                 rpSBML._checklibSBML(target_parameter.setId(source_parameter.getId()), 'setting target parameter ID')
@@ -250,10 +250,10 @@ class rpSBML:
                 rpSBML._checklibSBML(target_parameter.setConstant(source_parameter.getConstant()),
                     'setting target parameter ID')
         ################ FBC GENE PRODUCTS ########################
-        # WARNING: here we compare by ID
+        #WARNING: here we compare by ID
         targetGenProductID = [i.getId() for i in target_fbc.getListOfGeneProducts()]
         for source_geneProduct in source_fbc.getListOfGeneProducts():
-            if source_geneProduct.getId() not in targetGenProductID:
+            if not source_geneProduct.getId() in targetGenProductID:
                 target_geneProduct = target_fbc.createGeneProduct()
                 rpSBML._checklibSBML(target_geneProduct, 'creating target gene product')
                 rpSBML._checklibSBML(target_geneProduct.setId(source_geneProduct.getId()),
@@ -265,7 +265,8 @@ class rpSBML:
                 rpSBML._checklibSBML(target_geneProduct.setMetaId(source_geneProduct.getMetaId()),
                     'setting target gene product meta_id')
         ############### FBC OBJECTIVES ############
-        # WARNING: here we compare by ID
+        #WARNING: here we compare by ID
+        #TODO: if overlapping id's need to replace the id with modified, as for the species
         targetObjectiveID = [i.getId() for i in target_fbc.getListOfObjectives()]
         sourceObjectiveID = [i.getId() for i in source_fbc.getListOfObjectives()]
         for source_objective in source_fbc.getListOfObjectives():
@@ -298,9 +299,24 @@ class rpSBML:
             list_target = [i for i in species_source_target[source_species]]
             if source_species in list_target:
                 logging.warning('The source ('+str(source_species)+') and target species ids ('+str(list_target)+') are the same')
-            # if no match then add it to the target model
-            if species_source_target[source_species]=={}:
-                # logging.debug('Creating source species '+str(source_species)+' in target rpsbml')
+            #if match, replace the annotation from the source to the target
+            if not species_source_target[source_species]=={}:
+                list_species = [i for i in species_source_target[source_species]]
+                logging.debug('list_species: '+str(list_species))
+                if len(list_species)==0:
+                    continue
+                    #logging.warning('Source species '+str(member.getIdRef())+' has been created in the target model')
+                elif len(list_species)>1:
+                    logging.warning('There are multiple matches to the species '+str(member.getIdRef())+'... taking the first one: '+str(list_species))
+                #TODO: loop throught the annotations and replace the non-overlapping information
+                target_member = target_rpsbml.model.getSpecies(list_species[0])
+                source_member = source_rpsbml.model.getSpecies(source_species)
+                rpSBML._checklibSBML(target_member, 'Retraiving the target species: '+str(list_species[0]))
+                rpSBML._checklibSBML(source_member, 'Retreiving the source species: '+str(source_species))
+                rpSBML._checklibSBML(target_member.setAnnotation(source_member.getAnnotation()), 'Replacing the annotations')
+            #if no match then add it to the target model
+            else:
+                logging.debug('Creating source species '+str(source_species)+' in target rpsbml')
                 source_species = source_rpsbml.model.getSpecies(source_species)
                 if not source_species:
                     logging.error('Cannot retreive model species: '+str(source_species))
@@ -310,7 +326,15 @@ class rpSBML:
                     rpSBML._checklibSBML(targetModel_species, 'creating species')
                     rpSBML._checklibSBML(targetModel_species.setMetaId(source_species.getMetaId()),
                             'setting target metaId')
-                    rpSBML._checklibSBML(targetModel_species.setId(source_species.getId()),
+                    ## need to check if the id of the source species does not already exist in the target model
+                    if source_species.getId() in target_species_ids:
+                        target_species_id = source_rpsbml.model.id+'__'+str(source_species.getId())
+                        if not source_species.getId() in species_source_target:
+                            species_source_target[source_species.getId()] = {}
+                        species_source_target[source_species.getId()][source_rpsbml.model.id+'__'+str(source_species.getId())] = 1.0
+                    else:
+                        target_species_id = source_species.getId()
+                    rpSBML._checklibSBML(targetModel_species.setId(target_species_id),
                             'setting target id')
                     rpSBML._checklibSBML(targetModel_species.setCompartment(comp_source_target[source_species.getCompartment()]),
                             'setting target compartment')
@@ -331,8 +355,9 @@ class rpSBML:
                     rpSBML._checklibSBML(targetModel_species.setAnnotation(source_species.getAnnotation()),
                         'setting target annotation')
         ################ REACTIONS ###################
-        # TODO; consider the case where two reactions have the same ID's but are not the same reactions
-        reac_replace = {}
+        #TODO; consider the case where two reactions have the same ID's but are not the same reactions
+        #TODO: if overlapping id's need to replace the id with modified, as for the species
+        reactions_source_target = {}
         for source_reaction in source_rpsbml.model.getListOfReactions():
             is_found = False
             for target_reaction in target_rpsbml.model.getListOfReactions():
@@ -340,7 +365,7 @@ class rpSBML:
                 if match:
                     # logging.debug('Source reaction '+str(source_reaction)+' matches with target reaction '+str(target_reaction))
                     # source_reaction[source_reaction.getId()] = target_reaction.getId()
-                    reac_replace[source_reaction.getId()] = target_reaction.getId()
+                    reactions_source_target[source_reaction.getId()] = target_reaction.getId()
                     is_found = True
                     break
             if not is_found:
@@ -425,7 +450,7 @@ class rpSBML:
                     rpSBML._checklibSBML(target_product.setStoichiometry(source_product.getStoichiometry()),
                             'set stoichiometry ('+str(source_product.getStoichiometry)+')')
         #### GROUPS #####
-        # TODO loop through the groups to add them
+        #TODO loop through the groups to add them
         if not target_rpsbml.model.isPackageEnabled('groups'):
             rpSBML._checklibSBML(target_rpsbml.model.enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/groups/version1',
@@ -439,7 +464,7 @@ class rpSBML:
         target_groups = target_rpsbml.model.getPlugin('groups')
         rpSBML._checklibSBML(target_groups, 'fetching the target model groups')
         # # logging.debug('species_source_target: '+str(species_source_target))
-        # # logging.debug('reac_replace: '+str(reac_replace))
+        # # logging.debug('reactions_source_target: '+str(reactions_source_target))
         source_groups_ids = [i.id for i in source_groups.getListOfGroups()]
         target_groups_ids = [i.id for i in target_groups.getListOfGroups()]
         #NOTE: only need to update the source species since these are the ones that are replaced with their equivalent
@@ -461,10 +486,10 @@ class rpSBML:
                             #logging.warning('Source species '+str(member.getIdRef())+' has been created in the target model')
                         elif len(list_species)>1:
                             logging.warning('There are multiple matches to the species '+str(member.getIdRef())+'... taking the first one: '+str(list_species))
-                        self._checklibSBML(member.setIdRef(list_species[0]), 'Setting name to the groups member')
+                        rpSBML._checklibSBML(member.setIdRef(list_species[0]), 'Setting name to the groups member')
             #create and add the groups if a source group does not exist in the target
             if not source_group.id in target_groups_ids:
-                self._checklibSBML(target_groups.addGroup(source_group),
+                rpSBML._checklibSBML(target_groups.addGroup(source_group),
                     'copy the source groups to the target groups')
             #if the group already exists in the target then need to add new members
             else:
@@ -473,8 +498,8 @@ class rpSBML:
                 for member in source_group.getListOfMembers():
                     if member.getIdRef() not in target_group_ids:
                         new_member = target_group.createMember()
-                        self._checklibSBML(new_member, 'Creating a new groups member')
-                        self._checklibSBML(new_member.setIdRef(member.getIdRef()), 'Setting name to the groups member')
+                        rpSBML._checklibSBML(new_member, 'Creating a new groups member')
+                        rpSBML._checklibSBML(new_member.setIdRef(member.getIdRef()), 'Setting name to the groups member')
 
         """
         for group in source_groups.getListOfGroups():
@@ -496,20 +521,15 @@ class rpSBML:
                             member.setIdRef(list_species[0])
             elif group.getId()==pathway_id:
                 for member in group.getListOfMembers():
-                    if member.getIdRef() in reac_replace:
-                        member.setIdRef(reac_replace[member.getIdRef()])
+                    if member.getIdRef() in reactions_source_target:
+                        member.setIdRef(reactions_source_target[member.getIdRef()])
             rpSBML._checklibSBML(target_groups.addGroup(group),
                     'copy the source groups to the target groups')
         """
         ###### TITLES #####
         target_rpsbml.model.setId(target_rpsbml.model.getId()+'__'+source_rpsbml.model.getId())
         target_rpsbml.model.setName(target_rpsbml.model.getName()+' merged with '+source_rpsbml.model.getId())
-        '''
-        if fillOrphanSpecies == True:
-            self.fillOrphan(target_rpsbml, self.pathway_id, compartment_id)
-        '''
-        return species_source_target, reac_replace
-
+        return species_source_target, reactions_source_target
 
     @staticmethod
     def _findUniqueRowColumn(pd_matrix):
