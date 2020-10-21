@@ -17,7 +17,6 @@ requirements:
     - python {{ python }}
   run:
     - python {{ python }}
-    - python=3.6|3.7
     - brs_utils
     - credisdict
     - python-libsbml
