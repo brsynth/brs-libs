@@ -18,8 +18,8 @@ class Test_rpSBML(TestCase):
         if not os_path.exists(self.outdir):
             os_mkdirs(self.outdir)
 
-    def test_initEmpty(self):
-        rpsbml = rpSBML('rpSBML_test')
+    # def test_initEmpty(self):
+    #     rpsbml = rpSBML('rpSBML_test')
 
     def test_score(self):
         rpsbml = rpSBML('rp_1_11', inFile='data/rp_1_11_sbml.xml')
