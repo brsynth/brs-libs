@@ -9,6 +9,7 @@ on:
     branches: [ master, main ]
     paths:
       - 'brs_libs/*'
+      - 'tests/*.py'
   pull_request:
     branches: [ master ]
 
