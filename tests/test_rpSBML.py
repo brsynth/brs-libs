@@ -47,8 +47,6 @@ class Test_rpSBML(TestCase):
         rpsbml.createPathway('rp_pathway')
         rpsbml.createPathway('central_species')
         rpsbml.writeSBML(self.outdir)
-        # print(rpsbml==rpsbml)
-        # self.assertTrue(False)
         file_root = name+'_sbml.xml'
         from io import open as io_open
         self.assertListEqual(
