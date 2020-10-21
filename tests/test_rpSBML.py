@@ -52,7 +52,7 @@ class Test_rpSBML(TestCase):
         file_root = name+'_sbml.xml'
         from io import open as io_open
         self.assertListEqual(
-            list(io_open(outdir+file_root)),
+            list(io_open(self.outdir+file_root)),
             list(io_open('data/'+file_root)))
 
 
