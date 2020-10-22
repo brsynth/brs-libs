@@ -17,7 +17,8 @@ services:
 
   build:
     <<: *default
-    command: "conda build --no-test \
+    command: "rm -rf ${CONDA_BLD_PATH}/*
+           && conda build --no-test \
                 -c brsynth \
                 -c conda-forge \
                 --output-folder ${CONDA_BLD_PATH} recipe"
