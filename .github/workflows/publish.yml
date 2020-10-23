@@ -38,6 +38,16 @@ jobs:
           -c conda-forge \
           --output-folder ${CONDA_BLD_PATH} recipe
 
+    - name: Install Redis server
+      shell: bash -l {0}
+      run: |
+        conda install -y -c anaconda redis
+
+    - name: Start Redis server
+      shell: bash -l {0}
+      run: |
+        redis-server &
+
     - name: Test conda package
       shell: bash -l {0}
       run: |
