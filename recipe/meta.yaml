@@ -22,7 +22,7 @@ requirements:
     - python-libsbml
     - numpy
     - pandas
-    - redis
+    - redis-py
     - requests
     - colored
     - rdkit==2020.03.6
