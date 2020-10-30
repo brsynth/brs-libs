@@ -6,7 +6,7 @@ name: Test suite
 on:
 
   push:
-    branches: [ master, main ]
+    branches: [ master, dev ]
     paths:
       - 'brs_libs/*'
       - 'tests/*.py'
@@ -15,25 +15,14 @@ on:
 
 jobs:
 
-  Functional:
+  Test Full:
 
     runs-on: ubuntu-latest
 
-    # strategy:
-    #   matrix:
-    #     python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
-
     steps:
-
     - uses: actions/checkout@v2
 
-    # - name: Set up Python ${{ matrix.python-version }}
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: ${{ matrix.python-version }}
-    #
     - name: Test
       run: |
-        cd tests
-        bash ./test-in-docker.sh
-#        pytest --verbose
+        cd ci
+        bash ./pytest-indocker.sh
