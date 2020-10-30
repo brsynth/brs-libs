@@ -1561,7 +1561,7 @@ class rpSBML:
     # @param model libSBML model to be saved to file
     # @param model_id model id, note that the name of the file will be that
     # @param path Non required parameter that will define the path where the model will be saved
-    def writeSBML(self, filename):
+    def writeSBML(self, filename=None):
         # ####### check the path #########
         # # need to determine where are the path id's coming from
         # p = None
