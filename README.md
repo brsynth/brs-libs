@@ -29,15 +29,6 @@ In order to save memory space, cache data can be loaded once in a database (redi
 
 
 ### Install
-#### From pip
-rpCompletion requires [RDKit](https://www.RDKit.org) which is not available through pip. It can be installed through Conda:
-```sh
-[sudo] conda install -c conda-forge rdkit
-```
-Then, install `brs_libs`:
-```sh
-[sudo] python -m pip install brs_libs
-```
 #### From Conda
 ```sh
 [sudo] conda install -c brsynth -c conda-forge brs_libs
