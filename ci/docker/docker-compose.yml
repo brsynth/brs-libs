@@ -57,42 +57,42 @@ services:
     image: alpine
     <<: *default-volumes
     working_dir: ${HOMEDIR}/ci
-    command: scripts/conda-clean_env.sh
+    command: bash scripts/conda-clean_env.sh
 
   build:
     <<: *default-image-build
     <<: *default-volumes
-    command: scripts/conda-build.sh
+    command: bash scripts/conda-build.sh
 
   test:
     <<: *default-image-build
     <<: *default-volumes
-    command: scripts/conda-test.sh
+    command: bash scripts/conda-test.sh
 
   convert:
     <<: *default-image-build
     <<: *default-volumes
-    command: scripts/conda-convert.sh
+    command: bash scripts/conda-convert.sh
 
   publish:
     <<: *default-image-build
     <<: *default-volumes
-    command: scripts/conda-publish.sh
+    command: bash scripts/conda-publish.sh
 
   flake1:
     <<: *default-image-check
     <<: *default-volumes
-    command: ci/scripts/flake_light.sh
+    command: bash ci/scripts/flake_light.sh
 
   flake:
     <<: *default-image-check
     <<: *default-volumes
-    command: ci/scripts/flake.sh
+    command: bash ci/scripts/flake.sh
 
   bandit:
     <<: *default-image-check
     <<: *default-volumes
-    command: ci/scripts/bandit.sh
+    command: bash ci/scripts/bandit.sh
 
   pytest:
     <<: *default-image-test
