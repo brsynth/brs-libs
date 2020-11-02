@@ -32,7 +32,9 @@ jobs:
 
     - name: Build conda package
       shell: bash -l {0}
-      run: ./scripts/conda-build.sh
+      run: |
+        cd ci
+        ./scripts/conda-build.sh
 
     - name: Install Redis server
       shell: bash -l {0}
@@ -44,12 +46,18 @@ jobs:
 
     - name: Test conda package
       shell: bash -l {0}
-      run: ./scripts/conda-test.sh
+      run: |
+        cd ci
+        ./scripts/conda-test.sh
 
     - name: Convert to other platforms
       shell: bash -l {0}
-      run: ./scripts/conda-convert.sh
+      run: |
+        cd ci
+        ./scripts/conda-convert.sh
 
     - name: Upload to anaconda
       shell: bash -l {0}
-      run: ./scripts/conda-publish.sh
+      run: |
+        cd ci
+        ./scripts/conda-publish.sh
