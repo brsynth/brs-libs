@@ -7,10 +7,12 @@ on:
 
   push:
     branches: [ master, dev ]
-    paths:
-      - '.github/workflows/check.yml'
-      - 'brs_libs/*'
-      - 'tests/*.py'
+    paths-ignore:
+      - 'RELEASE*'
+      - 'README*'
+      - 'LICENSE*'
+      - 'recipe'
+      - 'docs'
   pull_request:
     branches: [ master ]
 
