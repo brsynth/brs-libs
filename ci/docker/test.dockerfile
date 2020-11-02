@@ -5,7 +5,7 @@ RUN conda update -n base -c defaults conda \
  && conda install -y -c conda-forge pyyaml
 
 ARG HOME
-WORKDIR ${HOME}/tests
+WORKDIR ${HOME}
 
 ADD ci ci
 ADD recipe recipe
@@ -28,7 +28,6 @@ RUN echo "conda env list \
         | grep test_ \
         | xargs -L 1 -I env \
         conda run -n env \$@" >> /docker-entrypoint.sh
-
-
 RUN chmod +x /docker-entrypoint.sh
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
