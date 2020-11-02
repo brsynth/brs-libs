@@ -1,3 +1,4 @@
 #!/bin/bash
 
-pytest --verbose $file
+cd tests
+pytest --verbose $@

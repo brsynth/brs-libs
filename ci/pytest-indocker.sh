@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bash ./docker/scripts/_indocker.sh pytest
+bash ./docker/scripts/_indocker.sh pytest $@

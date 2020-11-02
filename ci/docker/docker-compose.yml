@@ -96,7 +96,7 @@ services:
 
   pytest:
     <<: *default-image-test
-    command: bash ci/pytest/cmd.sh
+    command: bash ci/scripts/pytest.sh ${CMD_ARGS}
 
   run:
     <<: *default-image-run
