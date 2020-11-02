@@ -1,3 +1,7 @@
+0.5.1 - Nov 2, 2020
+    - add 'ci' toolkit for developpers
+    - rpSBML: handling parameters and modelName handling
+
 0.4.1 - Oct 23, 2020
     - update testing phase by installing and starting redis server
 
