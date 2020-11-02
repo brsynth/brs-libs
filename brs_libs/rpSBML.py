@@ -44,26 +44,42 @@ class rpSBML:
     # @param model libSBML model object
     # @param docModel libSBML Document object
     # @param nameSpaceModel libSBML name space (not required)
-    def __init__(self, modelName, document=None, inFile=''):
+    def __init__(self, modelName='', document=None, inFile=''):
         # WARNING: change this to reflect the different debugging levels
 #        logging.info('Started instance of rpSBML')
         # logging.setLevel(logging.INFO)
-        self.modelName = modelName
-        self.document = document
-        self.score = {'value': -1, 'nb_rules': 0}
+
+        self.modelName = None
+        self.document  = None
 
         if inFile:
             try:
                 self.readSBML(inFile)
             except FileNotFoundError as e:
                 print(e)
+        elif document:
+            self.document  = document
+        elif modelName:
+            self.modelName = modelName
+        else:
+            self.modelName = 'dummy'
 
+        self.score = {'value': -1, 'nb_rules': 0}
 
         self.miriam_header = {'compartment': {'mnx': 'metanetx.compartment/', 'bigg': 'bigg.compartment/', 'seed': 'seed/', 'name': 'name/'}, 'reaction': {'mnx': 'metanetx.reaction/', 'rhea': 'rhea/', 'reactome': 'reactome/', 'bigg': 'bigg.reaction/', 'sabiork': 'sabiork.reaction/', 'ec': 'ec-code/', 'biocyc': 'biocyc/', 'lipidmaps': 'lipidmaps/', 'uniprot': 'uniprot/'}, 'species': {'inchikey': 'inchikey/', 'pubchem': 'pubchem.compound/','mnx': 'metanetx.chemical/', 'chebi': 'chebi/CHEBI:', 'bigg': 'bigg.metabolite/', 'hmdb': 'hmdb/', 'kegg_c': 'kegg.compound/', 'kegg_d': 'kegg.drug/', 'biocyc': 'biocyc/META:', 'seed': 'seed.compound/', 'metacyc': 'metacyc.compound/', 'sabiork': 'sabiork.compound/', 'reactome': 'reactome/R-ALL-'}}
         self.header_miriam = {'compartment': {'metanetx.compartment': 'mnx', 'bigg.compartment': 'bigg', 'seed': 'seed', 'name': 'name'}, 'reaction': {'metanetx.reaction': 'mnx', 'rhea': 'rhea', 'reactome': 'reactome', 'bigg.reaction': 'bigg', 'sabiork.reaction': 'sabiork', 'ec-code': 'ec', 'biocyc': 'biocyc', 'lipidmaps': 'lipidmaps', 'uniprot': 'uniprot'}, 'species': {'inchikey': 'inchikey', 'pubchem.compound': 'pubchem', 'metanetx.chemical': 'mnx', 'chebi': 'chebi', 'bigg.metabolite': 'bigg', 'hmdb': 'hmdb', 'kegg.compound': 'kegg_c', 'kegg.drug': 'kegg_d', 'biocyc': 'biocyc', 'seed.compound': 'seed', 'metacyc.compound': 'metacyc', 'sabiork.compound': 'sabiork', 'reactome': 'reactome'}}
 
     def getModel(self):
-        return self.document.getModel()
+        return self.getDocument().getModel()
+
+    def getDocument(self):
+        return self.document
+
+    def getName(self):
+        if self.modelName:
+            return self.modelName
+        else:
+            return self.getModel().getName()
 
     def compute_score(self, pathway_id='rp_pathway'):
         self.score['value'] = 0
@@ -1081,7 +1097,7 @@ class rpSBML:
         return self.getScore() > rpsbml.getScore()
 
     def __str__(self):
-        return 'modelName: ' + str(self.modelName)  + '\n' \
+        return 'modelName: ' + str(self.getName())  + '\n' \
              + 'score: '     + str(self.getScore()) + '\n' \
              + 'document: '  + str(self.document)   + '\n' \
              + 'model: '     + str(self.getModel())      + '\n'
@@ -1520,22 +1536,20 @@ class rpSBML:
         if not os_path.isfile(inFile):
             logging.error('Invalid input file')
             raise FileNotFoundError
-        document = libsbml.readSBMLFromFile(inFile)
-        rpSBML._checklibSBML(document, 'reading input file')
-        errors = document.getNumErrors()
+        self.document = libsbml.readSBMLFromFile(inFile)
+        rpSBML._checklibSBML(self.getDocument(), 'reading input file')
+        errors = self.getDocument().getNumErrors()
         # display the errors in the log accordning to the severity
-        for err in [document.getError(i) for i in range(document.getNumErrors())]:
+        for err in [self.getDocument().getError(i) for i in range(self.getDocument().getNumErrors())]:
             # TODO if the error is related to packages not enabled (like groups or fbc) activate them
             if err.isFatal:
                 logging.error('libSBML reading error: '+str(err.getShortMessage()))
                 raise FileNotFoundError
             else:
                 logging.warning('libSBML reading warning: '+str(err.getShortMessage()))
-        model = document.getModel()
-        if not model:
+        if not self.getModel():
             logging.error('Either the file was not read correctly or the SBML is empty')
             raise FileNotFoundError
-        self.document = document
         # enabling the extra packages if they do not exists when reading a model
         if not self.getModel().isPackageEnabled('groups'):
             rpSBML._checklibSBML(self.getModel().enablePackage(
@@ -1543,14 +1557,14 @@ class rpSBML:
                 'groups',
                 True),
                     'Enabling the GROUPS package')
-            rpSBML._checklibSBML(self.document.setPackageRequired('groups', False), 'enabling groups package')
+            rpSBML._checklibSBML(self.getDocument().setPackageRequired('groups', False), 'enabling groups package')
         if not self.getModel().isPackageEnabled('fbc'):
             rpSBML._checklibSBML(self.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
                     'Enabling the FBC package')
-            rpSBML._checklibSBML(self.document.setPackageRequired('fbc', False), 'enabling FBC package')
+            rpSBML._checklibSBML(self.getDocument().setPackageRequired('fbc', False), 'enabling FBC package')
 
 
 
@@ -1583,13 +1597,13 @@ class rpSBML:
         # if not os_path.exists(p):
         #     os_mkdirs(p)
         ext = ''
-        if not str(self.modelName).endswith('_sbml'):
+        if not str(self.getName()).endswith('_sbml'):
             ext = '_sbml'
         if filename:
             out_filename = filename
         else:
-            out_filename = str(self.modelName)+ext+'.xml'
-        libsbml.writeSBMLToFile(self.document, out_filename)
+            out_filename = str(self.getName())+ext+'.xml'
+        libsbml.writeSBMLToFile(self.getDocument(), out_filename)
         return True
 
 

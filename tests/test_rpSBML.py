@@ -18,11 +18,26 @@ class Test_rpSBML(TestCase):
         if not os_path.exists(self.outdir):
             os_mkdirs(self.outdir)
 
-    # def test_initEmpty(self):
-    #     rpsbml = rpSBML('rpSBML_test')
+    def test_initWithInFile(self):
+        rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
+        self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
+
+    def test_initWithDocument(self):
+        _rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
+        rpsbml  = rpSBML(document=_rpsbml.getDocument())
+        self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
+
+    def test_initWithModelName(self):
+        _rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
+        rpsbml  = rpSBML(modelName=_rpsbml.getName())
+        self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
+
+    def test_initWithNothing(self):
+        rpsbml  = rpSBML()
+        self.assertEqual(rpsbml.getName(), 'dummy')
 
     def test_score(self):
-        rpsbml = rpSBML('rp_1_11', inFile='data/rp_1_11_sbml.xml')
+        rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
         rpsbml.compute_score()
         self.assertEqual(rpsbml.getScore(), 0.6194499694153365)
 
