@@ -9,6 +9,7 @@ from pandas  import DataFrame  as pd_DataFrame
 from inspect import getmembers as inspect_getmembers
 from inspect import ismethod   as inspect_ismethod
 
+import json
 
 ## @package RetroPath SBML writer
 # Documentation for SBML representation of the different model
@@ -112,8 +113,8 @@ class rpSBML:
         if not os_path.exists(path_target):
             logging.error('Target SBML file is invalid: '+str(path_target))
             return False
-        source_rpsbml = rpSBML.rpSBML('source', path=path_source)
-        target_rpsbml = rpSBML.rpSBML('target', path=path_target)
+        source_rpsbml = rpSBML('source', inFile=path_source)
+        target_rpsbml = rpSBML('target', inFile=path_target)
         rpSBML.mergeModels(source_rpsbml,
                            target_rpsbml)
         target_rpsbml.writeSBML(path_merge)
@@ -122,7 +123,7 @@ class rpSBML:
     @staticmethod
     #TODO: add a confidence in the merge using the score in
     #TODO: seperate the different parts so that others may use it
-    def mergeModels(source_rpsbml, target_rpsbml):
+    def mergeModels(source_rpsbml, target_rpsbml, del_sp_react=False, del_sp_pro=False):
         """Merge two models species and reactions using the annotations to recognise the same species and reactions
 
         The source model has to have both the GROUPS and FBC packages enabled in its SBML. The course must have a groups
@@ -131,9 +132,13 @@ class rpSBML:
 
         :param source_rpsbml: The source rpSBML object
         :param target_rpsbml: The target rpSBML object
+        :param del_sp_react: Delete the single parent reactants. If False a reaction is created that produces the reactant
+        :param del_sp_pro: Delete the single parent products. If False a reactions is created that consumes the product
 
         :type source_rpsbml: rpSBML
         :type target_rpsbml: rpSBML
+        :type del_sp_react: bool
+        :type del_sp_pro: bool
 
         :return: Tuple of dict where the first entry is the species source to target conversion and the second is the reaction source to target conversion
         :rtype: tuple
@@ -141,30 +146,32 @@ class rpSBML:
         #target_rpsbml.model = target_document.getModel()
         #Find the ID's of the similar target_rpsbml.model species
         ################ MODEL FBC ########################
-        if not target_rpsbml.model.isPackageEnabled('fbc'):
-            rpSBML._checklibSBML(target_rpsbml.model.enablePackage(
+        target_rpsbml_model = target_rpsbml.getModel() #@Joan: why do I have to do this? does not seem to add much
+        source_rpsbml_model = source_rpsbml.getModel()
+        if not target_rpsbml_model.isPackageEnabled('fbc'):
+            rpSBML._checklibSBML(target_rpsbml_model.enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
                     'Enabling the FBC package')
-        if not source_rpsbml.model.isPackageEnabled('fbc'):
-            rpSBML._checklibSBML(source_rpsbml.model.enablePackage(
+        if not source_rpsbml_model.isPackageEnabled('fbc'):
+            rpSBML._checklibSBML(source_rpsbml_model.enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
                     'Enabling the FBC package')
-        target_fbc = target_rpsbml.model.getPlugin('fbc')
-        source_fbc = source_rpsbml.model.getPlugin('fbc')
+        target_fbc = target_rpsbml_model.getPlugin('fbc')
+        source_fbc = source_rpsbml_model.getPlugin('fbc')
         #note sure why one needs to set this as False
         rpSBML._checklibSBML(source_rpsbml.document.setPackageRequired('fbc', False), 'enabling FBC package')
         ################ UNITDEFINITIONS ######
         #return the list of unit definitions id's for the target to avoid overwritting
         #WARNING: this means that the original unit definitions will be prefered over the new one
-        target_unitDefID = [i.getId() for i in target_rpsbml.model.getListOfUnitDefinitions()]
-        for source_unitDef in source_rpsbml.model.getListOfUnitDefinitions():
+        target_unitDefID = [i.getId() for i in target_rpsbml_model.getListOfUnitDefinitions()]
+        for source_unitDef in source_rpsbml_model.getListOfUnitDefinitions():
             if not source_unitDef.getId() in target_unitDefID: #have to compare by ID since no annotation
                 #create a new unitDef in the target
-                target_unitDef = target_rpsbml.model.createUnitDefinition()
+                target_unitDef = target_rpsbml_model.createUnitDefinition()
                 rpSBML._checklibSBML(target_unitDef, 'fetching target unit definition')
                 #copy unitDef info to the target
                 rpSBML._checklibSBML(target_unitDef.setId(source_unitDef.getId()),
@@ -188,15 +195,15 @@ class rpSBML:
         # Compare by MIRIAM annotations
         #Note that key is source and value is target conversion
         comp_source_target = {}
-        for source_compartment in source_rpsbml.model.getListOfCompartments():
+        for source_compartment in source_rpsbml_model.getListOfCompartments():
             found = False
-            target_ids = [i.getId() for i in target_rpsbml.model.getListOfCompartments()]
+            target_ids = [i.getId() for i in target_rpsbml_model.getListOfCompartments()]
             source_annotation = source_compartment.getAnnotation()
             if not source_annotation:
                 logging.warning('No annotation for the source of compartment '+str(source_compartment.getId()))
                 continue
             #compare by MIRIAM first
-            for target_compartment in target_rpsbml.model.getListOfCompartments():
+            for target_compartment in target_rpsbml_model.getListOfCompartments():
                 target_annotation = target_compartment.getAnnotation()
                 if not target_annotation:
                     logging.warning('No annotation for the target of compartment: '+str(target_compartment.getId()))
@@ -212,7 +219,7 @@ class rpSBML:
                     found = True
                 #if there is not MIRIAM match and the id's differ then add it
                 else:
-                    target_compartment = target_rpsbml.model.createCompartment()
+                    target_compartment = target_rpsbml_model.createCompartment()
                     rpSBML._checklibSBML(target_compartment, 'Creating target compartment')
                     rpSBML._checklibSBML(target_compartment.setMetaId(source_compartment.getMetaId()),
                             'setting target metaId')
@@ -235,10 +242,10 @@ class rpSBML:
         # logging.debug('comp_source_target: '+str(comp_source_target))
         ################ PARAMETERS ###########
         #WARNING: here we compare by ID
-        targetParametersID = [i.getId() for i in target_rpsbml.model.getListOfParameters()]
-        for source_parameter in source_rpsbml.model.getListOfParameters():
+        targetParametersID = [i.getId() for i in target_rpsbml_model.getListOfParameters()]
+        for source_parameter in source_rpsbml_model.getListOfParameters():
             if not source_parameter.getId() in targetParametersID:
-                target_parameter = target_rpsbml.model.createParameter()
+                target_parameter = target_rpsbml_model.createParameter()
                 rpSBML._checklibSBML(target_parameter, 'creating target parameter')
                 rpSBML._checklibSBML(target_parameter.setId(source_parameter.getId()), 'setting target parameter ID')
                 rpSBML._checklibSBML(target_parameter.setSBOTerm(source_parameter.getSBOTerm()),
@@ -295,6 +302,7 @@ class rpSBML:
         ################ SPECIES ####################
         species_source_target = rpSBML.compareSpecies(comp_source_target, source_rpsbml, target_rpsbml)
         # logging.debug('species_source_target: '+str(species_source_target))
+        target_species_ids = [i.id for i in target_rpsbml_model.getListOfSpecies()]
         for source_species in species_source_target:
             list_target = [i for i in species_source_target[source_species]]
             if source_species in list_target:
@@ -309,29 +317,29 @@ class rpSBML:
                 elif len(list_species)>1:
                     logging.warning('There are multiple matches to the species '+str(member.getIdRef())+'... taking the first one: '+str(list_species))
                 #TODO: loop throught the annotations and replace the non-overlapping information
-                target_member = target_rpsbml.model.getSpecies(list_species[0])
-                source_member = source_rpsbml.model.getSpecies(source_species)
+                target_member = target_rpsbml_model.getSpecies(list_species[0])
+                source_member = source_rpsbml_model.getSpecies(source_species)
                 rpSBML._checklibSBML(target_member, 'Retraiving the target species: '+str(list_species[0]))
                 rpSBML._checklibSBML(source_member, 'Retreiving the source species: '+str(source_species))
                 rpSBML._checklibSBML(target_member.setAnnotation(source_member.getAnnotation()), 'Replacing the annotations')
             #if no match then add it to the target model
             else:
                 logging.debug('Creating source species '+str(source_species)+' in target rpsbml')
-                source_species = source_rpsbml.model.getSpecies(source_species)
+                source_species = source_rpsbml_model.getSpecies(source_species)
                 if not source_species:
                     logging.error('Cannot retreive model species: '+str(source_species))
                 else:
                     rpSBML._checklibSBML(source_species, 'fetching source species')
-                    targetModel_species = target_rpsbml.model.createSpecies()
+                    targetModel_species = target_rpsbml_model.createSpecies()
                     rpSBML._checklibSBML(targetModel_species, 'creating species')
                     rpSBML._checklibSBML(targetModel_species.setMetaId(source_species.getMetaId()),
                             'setting target metaId')
                     ## need to check if the id of the source species does not already exist in the target model
                     if source_species.getId() in target_species_ids:
-                        target_species_id = source_rpsbml.model.id+'__'+str(source_species.getId())
+                        target_species_id = source_rpsbml_model.id+'__'+str(source_species.getId())
                         if not source_species.getId() in species_source_target:
                             species_source_target[source_species.getId()] = {}
-                        species_source_target[source_species.getId()][source_rpsbml.model.id+'__'+str(source_species.getId())] = 1.0
+                        species_source_target[source_species.getId()][source_rpsbml_model.id+'__'+str(source_species.getId())] = 1.0
                     else:
                         target_species_id = source_species.getId()
                     rpSBML._checklibSBML(targetModel_species.setId(target_species_id),
@@ -358,9 +366,9 @@ class rpSBML:
         #TODO; consider the case where two reactions have the same ID's but are not the same reactions
         #TODO: if overlapping id's need to replace the id with modified, as for the species
         reactions_source_target = {}
-        for source_reaction in source_rpsbml.model.getListOfReactions():
+        for source_reaction in source_rpsbml_model.getListOfReactions():
             is_found = False
-            for target_reaction in target_rpsbml.model.getListOfReactions():
+            for target_reaction in target_rpsbml_model.getListOfReactions():
                 score, match = rpSBML.compareReaction(species_source_target, source_reaction, target_reaction)
                 if match:
                     # logging.debug('Source reaction '+str(source_reaction)+' matches with target reaction '+str(target_reaction))
@@ -371,7 +379,7 @@ class rpSBML:
             if not is_found:
                 # logging.debug('Cannot find source reaction: '+str(source_reaction.getId()))
                 rpSBML._checklibSBML(source_reaction, 'fetching source reaction')
-                target_reaction = target_rpsbml.model.createReaction()
+                target_reaction = target_rpsbml_model.createReaction()
                 rpSBML._checklibSBML(target_reaction, 'create reaction')
                 target_fbc = target_reaction.getPlugin('fbc')
                 rpSBML._checklibSBML(target_fbc, 'fetching target FBC package')
@@ -451,17 +459,17 @@ class rpSBML:
                             'set stoichiometry ('+str(source_product.getStoichiometry)+')')
         #### GROUPS #####
         #TODO loop through the groups to add them
-        if not target_rpsbml.model.isPackageEnabled('groups'):
-            rpSBML._checklibSBML(target_rpsbml.model.enablePackage(
+        if not target_rpsbml_model.isPackageEnabled('groups'):
+            rpSBML._checklibSBML(target_rpsbml_model.enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/groups/version1',
                 'groups',
                 True),
                     'Enabling the GROUPS package')
         #!!!! must be set to false for no apparent reason
         rpSBML._checklibSBML(source_rpsbml.document.setPackageRequired('groups', False), 'enabling groups package')
-        source_groups = source_rpsbml.model.getPlugin('groups')
+        source_groups = source_rpsbml_model.getPlugin('groups')
         rpSBML._checklibSBML(source_groups, 'fetching the source model groups')
-        target_groups = target_rpsbml.model.getPlugin('groups')
+        target_groups = target_rpsbml_model.getPlugin('groups')
         rpSBML._checklibSBML(target_groups, 'fetching the target model groups')
         # # logging.debug('species_source_target: '+str(species_source_target))
         # # logging.debug('reactions_source_target: '+str(reactions_source_target))
@@ -527,9 +535,97 @@ class rpSBML:
                     'copy the source groups to the target groups')
         """
         ###### TITLES #####
-        target_rpsbml.model.setId(target_rpsbml.model.getId()+'__'+source_rpsbml.model.getId())
-        target_rpsbml.model.setName(target_rpsbml.model.getName()+' merged with '+source_rpsbml.model.getId())
+        target_rpsbml_model.setId(target_rpsbml_model.getId()+'__'+source_rpsbml_model.getId())
+        target_rpsbml_model.setName(target_rpsbml_model.getName()+' merged with '+source_rpsbml_model.getId())
+        ##### Check single parent species #####
+        # replace
+        rpSBML._checkSingleParent(target_rpsbml, del_sp_pro, del_sp_react)
         return species_source_target, reactions_source_target
+
+
+    @staticmethod
+    def _checkSingleParent(rpsbml,
+                           del_sp_pro=False,
+                           del_sp_react=False,
+                           upper_flux_bound=999999.0,
+                           lower_flux_bound=0.0,
+                           compartment_id='MNXM3',
+                           pathway_id='rp_pathway',
+                           central_species_group_id='central_species',
+                           sink_species_group_id='rp_sink_species'):
+        """Check if there are any single parent species in a heterologous pathways and if there are, either delete them or add reaction to complete the heterologous pathway
+
+        :param rpsbml: The rpSBML object
+        :param del_sp_pro: Define if to delete the products or create reaction that consume it
+        :param del_sp_react: Define if to delete the reactants or create reaction that produce it
+        :param upper_flux_bound: The upper flux bounds unit definitions default when adding new reaction (Default: 999999.0)
+        :param lower_flux_bound: The lower flux bounds unit definitions default when adding new reaction (Defaul: 0.0)
+        :param compartment_id: The id of the model compartment
+        :param pathway_id: The pathway ID (Default: rp_pathway)
+        :param central_species_group_id: The central species Groups id (Default: central_species)
+        :param sink_species_group_id: The sink specues Groups id (Default: sink_species_group_id)
+
+        :type rpsbml: rpSBML
+        :type del_sp_pro: bool
+        :type del_sp_react: bool
+        :type upper_flux_bound: float
+        :type lower_flux_bound: float
+        :type compartment_id: str
+        :type pathway_id: str
+        :type central_species_group_id: str
+        :type sink_species_group_id: str
+
+        :rtype: bool
+        :return: Success of failure of the function
+        """
+        import rpGraph
+        rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id)
+        consumed_species_nid = rpgraph.onlyConsumedSpecies()
+        produced_species_nid = rpgraph.onlyProducedSpecies()
+        if del_sp_pro:
+            for pro in produced_species_nid:
+                rpSBML._checklibSBML(target_rpsbml.model.removeSpecies(pro), 'removing the following product species: '+str(pro))
+        else:
+            for pro in produced_species_nid:
+                step = {'rule_id': None,
+                        'left': {pro.split('__')[0]: 1},
+                        'right': {},
+                        'step': None,
+                        'sub_step': None,
+                        'path_id': None,
+                        'transformation_id': None,
+                        'rule_score': None,
+                        'rule_ori_reac': None}
+                #note that here the pathwats are passed as NOT being part of the heterologous pathways and 
+                #thus will be ignored when/if we extract the rp_pathway from the full GEM model
+                rpsbml.createReaction(pro+'__consumption',
+                                      upper_flux_bound,
+                                      lower_flux_bound,
+                                      step,
+                                      compartment_id)
+        if del_sp_react:
+            for react in consumed_species_nid:
+                rpSBML._checklibSBML(target_rpsbml.model.removeSpecies(react), 'removing the following reactant species: '+str(react))
+        else:
+            for react in consumed_species_nid:
+                step = {'rule_id': None,
+                        'left': {},
+                        'right': {react.split('__')[0]: 1},
+                        'step': None,
+                        'sub_step': None,
+                        'path_id': None,
+                        'transformation_id': None,
+                        'rule_score': None,
+                        'rule_ori_reac': None}
+                #note that here the pathwats are passed as NOT being part of the heterologous pathways and 
+                #thus will be ignored when/if we extract the rp_pathway from the full GEM model
+                rpsbml.createReaction(react+'__production',
+                                      upper_flux_bound,
+                                      lower_flux_bound,
+                                      step,
+                                      compartment_id)
+        return True
+
 
     @staticmethod
     def _findUniqueRowColumn(pd_matrix):
@@ -674,7 +770,7 @@ class rpSBML:
         :param target_rpsbml: The target rpSBMl object
         :param source_rpsbml: The source rpSBML object
 
-        :type species_match: dict 
+        :type species_match: dict
         :type target_rpsbml: rpSBML
         :type source_rpsbml: rpSBML
 
@@ -943,13 +1039,15 @@ class rpSBML:
         source_target = {}
         target_source = {}
         species_match = {}
-        for source_species in source_rpsbml.model.getListOfSpecies():
+        source_rpsbml_model = source_rpsbml.getModel()
+        target_rpsbml_model = target_rpsbml.getModel()
+        for source_species in source_rpsbml_model.getListOfSpecies():
             # logging.debug('--- Trying to match chemical species: '+str(source_species.getId())+' ---')
             source_target[source_species.getId()] = {}
             species_match[source_species.getId()] = {}
             # species_match[source_species.getId()] = {'id': None, 'score': 0.0, 'found': False}
             # TODO: need to exclude from the match if a simulated chemical species is already matched with a higher score to another measured species
-            for target_species in target_rpsbml.model.getListOfSpecies():
+            for target_species in target_rpsbml_model.getListOfSpecies():
                 # skip the species that are not in the same compartment as the source
                 if not target_species.getCompartment()==comp_source_target[source_species.getCompartment()]:
                     continue
@@ -1741,29 +1839,24 @@ class rpSBML:
         :return: Success or failure of the command
         """
         ####### check the path #########
-        # need to determine where are the path id's coming from
-        p = None
-        if path:
-            if path[-1:]=='/':
-                path = path[:-1]
-            if not os_path.isdir(path):
-                if self.path:
-                    p = self.path
+        #need to determine where are the path id's coming from
+        try:
+            p = None
+            if path:
+                if os_path.isdir(path):
+                    m_n = self.modelName.replace('_sbml', '').replace('_rpsbml', '').replace('.sbml', '').replace('.rpsbml', '').replace('.xml', '')
+                    p = os_path.join(path, m_n)
                 else:
-                    logging.error('The output path is not a directory: '+str(path))
-                    return False
+                    if os_path.exists(path):
+                        logging.warning('overwriting the following sbml file: '+str(path))
+                    p = path
             else:
-                p = path
-        else:
-            p = self.path
-
-        ########## check and create folder #####
-        if not os_path.exists(p):
-            os_mkdirs(p)
-        ext = ''
-        if not str(self.modelName).endswith('_sbml'):
-            ext = '_sbml'
-        libsbml.writeSBMLToFile(self.document, p+'/'+str(self.modelName)+ext+'.xml')
+                raise ValueError('The input is invalid: '+str(path))
+            ########## check and create folder #####
+        except FileNotFoundError:
+            logging.error('Cannot find the following path: '+str(path))
+            return False
+        libsbml.writeSBMLToFile(self.document, p)
         return True
 
 
