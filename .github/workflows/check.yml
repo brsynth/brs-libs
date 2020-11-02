@@ -15,7 +15,7 @@ on:
 
 jobs:
 
-  Check Full:
+  Check:
 
     runs-on: ubuntu-latest
 
