@@ -8,6 +8,7 @@ on:
   push:
     branches: [ master, dev ]
     paths:
+      - '.github/workflows/test.yml'
       - 'brs_libs/*'
       - 'tests/*.py'
   pull_request:
