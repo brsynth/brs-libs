@@ -13,6 +13,8 @@ on:
       - 'LICENSE*'
       - 'recipe'
       - 'docs'
+      - '.github'
+      - '!.github/workflows/check*'
   pull_request:
     branches: [ master ]
 
