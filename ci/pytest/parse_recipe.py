@@ -10,9 +10,6 @@ channels_file = 'recipe/conda_channels.txt'
 recipe_file   = 'recipe/meta.yaml'
 bld_cfg_file  = 'recipe/conda_build_config.yaml'
 
-# output files
-cmd_file    = 'ci/pytest/cmd.sh'
-
 def parse_meta(filename):
 
     recipe = ''
@@ -58,14 +55,9 @@ def write_dependencies(filename, requirements):
         for req in requirements:
             f.write('  - '+req+'\n')
 
-def write_commands(filename, cmd):
-    with open(filename, 'w') as f:
-        f.write(' ; '.join(tests_cmd))
-
 
 requirements, tests_cmd = parse_meta(recipe_file)
 write_dependencies(env_file, requirements)
-write_commands(cmd_file, tests_cmd)
 
 bld_cfgs = parse_build_config(bld_cfg_file)
 for pkg in bld_cfgs:
@@ -73,4 +65,3 @@ for pkg in bld_cfgs:
         env_file_cfg = env_file+'.'+pkg+str(ver)
         dep = pkg+'='+str(ver)
         print(dep)
-        # write_dependencies(env_file_cfg, requirements+[dep])
