@@ -7,6 +7,9 @@ COPY recipe/conda_build_env.yaml /tmp/conda_build_env.yaml
 
 RUN conda env create -n build --file /tmp/conda_build_env.yaml
 
+RUN apt-get update \
+ && apt-get install -y make
+
 ARG HOME
 WORKDIR ${HOME}/ci
 

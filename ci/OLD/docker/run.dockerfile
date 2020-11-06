@@ -10,8 +10,11 @@ WORKDIR ${HOME}/tests
 ADD ci ci
 ADD recipe recipe
 
-RUN python ci/pytest/parse_recipe.py > /dev/null
-RUN conda env create -n test --file ci/pytest/environment.yml
+RUN python ci/test/parse_recipe.py > /dev/null
+RUN conda env create -n test --file ci/test/environment.yml
+
+RUN apt-get update \
+ && apt-get install -y make
 
 ARG PKG
 ADD ${PKG} ${PKG}
