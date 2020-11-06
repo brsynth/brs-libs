@@ -85,7 +85,7 @@ Please follow instructions below ti run tests:
 cd tests
 pytest -v
 ```
-For further tests and development tools, a CI toolkit is provided in `ci` folder (see [ci/README.md](ci/README.md).
+For further tests and development tools, a CI toolkit is provided in `ci` folder (see [ci/README.md](ci/README.md)).
 
 ## inchikeyMIRIAM
 Uses the rpCache to parse an SBML file to find all the chemical species, and try to recover the inchikey and add it to the MIRIAM annotation.
