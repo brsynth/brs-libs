@@ -44,7 +44,7 @@ class rpSBML:
     # @param model libSBML model object
     # @param docModel libSBML Document object
     # @param nameSpaceModel libSBML name space (not required)
-    def __init__(self, modelName='', document=None, inFile=''):
+    def __init__(self, inFile='', document=None, name=''):
         # WARNING: change this to reflect the different debugging levels
 #        logging.info('Started instance of rpSBML')
         # logging.setLevel(logging.INFO)
@@ -59,9 +59,11 @@ class rpSBML:
                 print(e)
         elif document:
             self.document  = document
-        elif modelName:
-            self.modelName = modelName
-        else:
+
+        if name:
+            self.modelName = name
+
+        if not self.getName():
             self.modelName = 'dummy'
 
         self.score = {'value': -1, 'nb_rules': 0}
@@ -70,7 +72,10 @@ class rpSBML:
         self.header_miriam = {'compartment': {'metanetx.compartment': 'mnx', 'bigg.compartment': 'bigg', 'seed': 'seed', 'name': 'name'}, 'reaction': {'metanetx.reaction': 'mnx', 'rhea': 'rhea', 'reactome': 'reactome', 'bigg.reaction': 'bigg', 'sabiork.reaction': 'sabiork', 'ec-code': 'ec', 'biocyc': 'biocyc', 'lipidmaps': 'lipidmaps', 'uniprot': 'uniprot'}, 'species': {'inchikey': 'inchikey', 'pubchem.compound': 'pubchem', 'metanetx.chemical': 'mnx', 'chebi': 'chebi', 'bigg.metabolite': 'bigg', 'hmdb': 'hmdb', 'kegg.compound': 'kegg_c', 'kegg.drug': 'kegg_d', 'biocyc': 'biocyc', 'seed.compound': 'seed', 'metacyc.compound': 'metacyc', 'sabiork.compound': 'sabiork', 'reactome': 'reactome'}}
 
     def getModel(self):
-        return self.getDocument().getModel()
+        if self.getDocument():
+            return self.getDocument().getModel()
+        else:
+            return None
 
     def getDocument(self):
         return self.document
@@ -78,8 +83,10 @@ class rpSBML:
     def getName(self):
         if self.modelName:
             return self.modelName
-        else:
+        elif self.getModel():
             return self.getModel().getName()
+        else:
+            return None
 
     def compute_score(self, pathway_id='rp_pathway'):
         self.score['value'] = 0
@@ -103,55 +110,6 @@ class rpSBML:
     ############################################ MERGE ##########################################################
     #############################################################################################################
 
-    # @staticmethod
-    # def mergeSBML(input_tar,
-    #               target_sbml,
-    #               output_tar):
-    #     """Merge one or more SBML files together
-    #
-    #     :param input_tar: The path of the TAR input containing the SBML file
-    #     :param target_sbml: The path of the SBML file to merge to
-    # 	:param output_tar: The path of the TAR output file
-    #
-    #     :type input_tar: str
-    #     :type target_sbml: str
-    # 	:type output_tar: str
-    #
-    #     :rtype: bool
-    #     :return: The success or failure of the function
-    #     """
-    #     with TemporaryDirectory() as tmpInputFolder:
-    #         with TemporaryDirectory() as tmpOutputFolder:
-    #             tar = tar_open(input_tar, 'r')
-    #             tar.extractall(path=tmpInputFolder)
-    #             tar.close()
-    #             if len(glob(tmpInputFolder+'/*'))==0:
-    #                 logging.error('Input file is empty')
-    #                 return False
-    #             for sbml_path in glob(tmpInputFolder+'/*'):
-    #                 '''
-    #                 rpsbml = rpSBML.rpSBML(file_name)
-    #                 rpsbml.readSBML(sbml_path)
-    #                 target_rpsbml = rpSBML.rpSBML(file_name)
-    #                 target_rpsbml.readSBML(target_sbml)
-    #                 rpmerge = rpMerge.rpMerge()
-    # 				species_source_target, reactions_convert = rpmerge.mergeModels(rpsbml, rpsbml_gem)
-    #                 '''
-    #
-    #                 file_name = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '').replace('_sbml', '').replace('_rpsbml', '')
-    #                 rpSBML.mergeSBMLFiles(sbml_path, target_sbml, tmpOutputFolder)
-    #                 os_replace(os_path.join(tmpOutputFolder, 'target.sbml'), os_path.join(tmpOutputFolder, file_name+'_sbml.xml'))
-    #             if len(glob(tmpOutputFolder+'/*'))==0:
-    #                 logging.error('rpMergeSBML has generated no results')
-    #                 return False
-    #             with tar_open(output_tar, mode='w:gz') as ot:
-    #                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
-    #                     file_name = str(sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '').replace('_sbml', '').replace('_rpsbml', ''))
-    #                     info = tarfile.TarInfo(file_name+'_sbml.xml')
-    #                     info.size = os_path.getsize(sbml_path)
-    #                     ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
-    #     return True
-
     @staticmethod
     def mergeSBMLFiles(input_sbml,
                        input_target,
@@ -165,8 +123,8 @@ class rpSBML:
         if not os_path.exists(input_target):
             logging.error('Target SBML file is invalid: '+str(input_target))
             return False
-        source_rpsbml = rpSBML('source', inFile=input_sbml)
-        target_rpsbml = rpSBML('target', inFile=input_target)
+        source_rpsbml = rpSBML(input_sbml,   name='source')
+        target_rpsbml = rpSBML(input_target, name='target')
         rpSBML.mergeModels(source_rpsbml,
                            target_rpsbml,
                            species_group_id,
@@ -1576,26 +1534,6 @@ class rpSBML:
     # @param model_id model id, note that the name of the file will be that
     # @param path Non required parameter that will define the path where the model will be saved
     def writeSBML(self, filename=None):
-        # ####### check the path #########
-        # # need to determine where are the path id's coming from
-        # p = None
-        # if path:
-        #     if path[-1:]=='/':
-        #         path = path[:-1]
-        #     if not os_path.isdir(path):
-        #         if path:
-        #             p = path
-        #         else:
-        #             logging.error('The output path is not a directory: '+str(path))
-        #             return False
-        #     else:
-        #         p = path
-        # else:
-        #     p = path
-        #
-        # ########## check and create folder #####
-        # if not os_path.exists(p):
-        #     os_mkdirs(p)
         ext = ''
         if not str(self.getName()).endswith('_sbml'):
             ext = '_sbml'
@@ -1603,6 +1541,7 @@ class rpSBML:
             out_filename = filename
         else:
             out_filename = str(self.getName())+ext+'.xml'
+        print(out_filename, self.getDocument())
         libsbml.writeSBMLToFile(self.getDocument(), out_filename)
         return True
 

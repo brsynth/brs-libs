@@ -19,17 +19,18 @@ class Test_rpSBML(TestCase):
             os_mkdirs(self.outdir)
 
     def test_initWithInFile(self):
-        rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
+        rpsbml = rpSBML('data/rp_1_11_sbml.xml')
         self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
 
     def test_initWithDocument(self):
-        _rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
+        _rpsbml = rpSBML('data/rp_1_11_sbml.xml')
         rpsbml  = rpSBML(document=_rpsbml.getDocument())
         self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
 
     def test_initWithModelName(self):
-        _rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
-        rpsbml  = rpSBML(modelName=_rpsbml.getName())
+        _rpsbml = rpSBML('data/rp_1_11_sbml.xml')
+        print('DEBUG: ', _rpsbml.getName())
+        rpsbml  = rpSBML(name=_rpsbml.getName())
         self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
 
     def test_initWithNothing(self):
@@ -37,7 +38,7 @@ class Test_rpSBML(TestCase):
         self.assertEqual(rpsbml.getName(), 'dummy')
 
     def test_score(self):
-        rpsbml = rpSBML(inFile='data/rp_1_11_sbml.xml')
+        rpsbml = rpSBML('data/rp_1_11_sbml.xml')
         rpsbml.compute_score()
         self.assertEqual(rpsbml.getScore(), 0.6194499694153365)
 
@@ -46,12 +47,9 @@ class Test_rpSBML(TestCase):
         rpSBML.mergeSBMLFiles('data/rp_1_11_sbml.xml', 'data/e_coli_model.sbml', outfile)
         self.assertTrue(Main._check_file_hash(outfile, '08286d75fe61a7571b3678cafb7ae6dcadebbc73ca74d24b01e291fe8770365c'))
 
-    # def test_mergeSBML(self):
-    #     rpSBML.mergeSBML('data/sbml.tar', 'data/e_coli_model.sbml', 'mergedSBML.tar')
-
     def test_print_rpSBML(self):
         name = 'rpSBML_test'
-        rpsbml = rpSBML(name)
+        rpsbml = rpSBML(name=name)
         rpsbml.genericModel(
                 'RetroPath_Pathway_test',
                 'RP_model_test',

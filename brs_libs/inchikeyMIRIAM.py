@@ -57,7 +57,7 @@ class inchikeyMIRIAM:
         """
         filename = input_sbml.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', '')
         self.logger.debug(filename)
-        rpsbml = rpSBML(filename, inFile=input_sbml)
+        rpsbml = rpSBML(inFile=input_sbml)
         for spe in rpsbml.getModel().getListOfSpecies():
             inchikey = None
             miriam_dict = rpsbml.readMIRIAMAnnotation(spe.getAnnotation())
