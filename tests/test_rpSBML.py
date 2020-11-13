@@ -46,10 +46,12 @@ class Test_rpSBML(TestCase):
     #     self.assertEqual(rpsbml.getScore(), 0.6194499694153365)
 
     def test_computeMeanRulesScore(self):
-        self.assertAlmostEqual(self.rpsbml._computeMeanRulesScore(), 0.5684564101634014, places=7, message='Equal to 0.5684564101634014')
+        self.assertAlmostEqual(self.rpsbml._computeMeanRulesScore(), 0.5684564101634014)
 
+    '''
     def test_dictRPpathway(self):
         self.assertDictEqual(self.rpsbml._dictRPpathway(), self.data['dictrppathway'])
+    '''
 
     def test_nameToSbmlId(self):
         self.assertEqual(self.rpsbml._nameToSbmlId('test123-_!"£$%^&*(){}@~><>?'), 'test123___________________')
