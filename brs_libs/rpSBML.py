@@ -12,6 +12,7 @@ from inspect  import getmembers as inspect_getmembers
 from inspect  import ismethod   as inspect_ismethod
 from tempfile import TemporaryDirectory
 from tarfile  import open       as tar_open
+from brs_libs import rpGraph
 
 ## @package RetroPath SBML writer
 # Documentation for SBML representation of the different model
@@ -143,10 +144,7 @@ class rpSBML:
         source_rpsbml = rpSBML(input_sbml,   name='source')
         target_rpsbml = rpSBML(input_target, name='target')
         rpSBML.mergeModels(source_rpsbml,
-                           target_rpsbml,
-                           species_group_id,
-                           sink_species_group_id,
-                           pathway_id)
+                           target_rpsbml)
         target_rpsbml.writeSBML(output_merged)
         return True
 
@@ -330,7 +328,7 @@ class rpSBML:
         ################ SPECIES ####################
         species_source_target = rpSBML.compareSpecies(comp_source_target, source_rpsbml, target_rpsbml)
         # logging.debug('species_source_target: '+str(species_source_target))
-        target_species_ids = [i.id for i in target_rpsbml_model.getListOfSpecies()]
+        target_species_ids = [i.id for i in target_rpsbml.getModel().getListOfSpecies()]
         for source_species in species_source_target:
             list_target = [i for i in species_source_target[source_species]]
             if source_species in list_target:
@@ -364,10 +362,10 @@ class rpSBML:
                             'setting target metaId')
                     ## need to check if the id of the source species does not already exist in the target model
                     if source_species.getId() in target_species_ids:
-                        target_species_id = source_rpsbml_model.id+'__'+str(source_species.getId())
+                        target_species_id = source_rpsbml.getModel().id+'__'+str(source_species.getId())
                         if not source_species.getId() in species_source_target:
                             species_source_target[source_species.getId()] = {}
-                        species_source_target[source_species.getId()][source_rpsbml_model.id+'__'+str(source_species.getId())] = 1.0
+                        species_source_target[source_species.getId()][source_rpsbml.getModel().id+'__'+str(source_species.getId())] = 1.0
                     else:
                         target_species_id = source_species.getId()
                     rpSBML._checklibSBML(targetModel_species.setId(target_species_id),
@@ -392,7 +390,7 @@ class rpSBML:
                         'setting target annotation')
         ################ REACTIONS ###################
         # TODO; consider the case where two reactions have the same ID's but are not the same reactions
-        reac_replace = {}
+        reactions_source_target = {}
         for source_reaction in source_rpsbml.getModel().getListOfReactions():
             is_found = False
             for target_reaction in target_rpsbml.getModel().getListOfReactions():
@@ -540,7 +538,7 @@ class rpSBML:
         target_rpsbml.getModel().setId(target_rpsbml.getModel().getId()+'__'+source_rpsbml.getModel().getId())
         target_rpsbml.getModel().setName(target_rpsbml.getModel().getName()+' merged with '+source_rpsbml.getModel().getId())
         rpSBML._checkSingleParent(target_rpsbml, del_sp_pro, del_sp_react)
-        return species_source_target, reac_replace
+        return species_source_target, reactions_source_target
 
 
     @staticmethod
@@ -578,7 +576,6 @@ class rpSBML:
         :rtype: bool
         :return: Success of failure of the function
         """
-        import rpGraph
         rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id)
         consumed_species_nid = rpgraph.onlyConsumedSpecies()
         produced_species_nid = rpgraph.onlyProducedSpecies()
