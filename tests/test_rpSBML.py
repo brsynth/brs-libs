@@ -56,14 +56,14 @@ class Test_rpSBML(TestCase):
     def test_genMetaID(self):
         self.assertEqual(self.rpsbml._genMetaID('test123'), 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae')
 
-    def test_asDict(self):
-        self.assertDictEqual(self.rpsbml.asDict(), self.data['asdict'])
+    def test_genJSON(self):
+        self.assertDictEqual(self.rpsbml.genJSON(), self.data['asdict'])
 
     def test_readRPrules(self):
         self.assertDictEqual(self.rpsbml.readRPrules(), self.data['readrprules'])
 
-    def test_getGroupsMembers(self):
-        self.assertCountEqual(self.rpsbml.getGroupsMembers('rp_pathway'), ['RP1', 'RP2', 'RP3'])
+    def test_readRPpathwayIDs(self):
+        self.assertCountEqual(self.rpsbml.readRPpathwayIDs('rp_pathway'), ['RP1', 'RP2', 'RP3'])
 
     def test_readRPspecies(self):
         self.assertDictEqual(self.rpsbml.readRPspecies(), self.data['readrpspecies'])
