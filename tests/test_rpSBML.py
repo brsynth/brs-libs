@@ -9,6 +9,7 @@ from unittest import TestCase
 from brs_libs import rpSBML
 from os       import path     as os_path
 from os       import makedirs as os_mkdirs
+from json     import load     as json_load
 
 # Cette classe est un groupe de tests. Son nom DOIT commencer
 # par 'Test' et la classe DOIT hériter de unittest.TestCase.
@@ -16,8 +17,9 @@ class Test_rpSBML(TestCase):
 
     def setUp(self):
         #load a rpSBML file
-        self.rpsbml = rpSBML(os.path.join(os.path.dirname(__file__), 'data', 'rpsbml.xml'))
-        self.data = json.load(os.path.join(os.path.dirname(__file__), 'data', 'data.json'))
+        self.rpsbml = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'rpsbml.xml'))
+        with open(os_path.join(os_path.dirname(__file__), 'data', 'data.json'), 'r') as f:
+            self.data = json_load(f)
 
     def test_initEmpty(self):
         rpsbml = rpSBML('rpSBML_test')
@@ -38,12 +40,10 @@ class Test_rpSBML(TestCase):
         rpsbml  = rpSBML()
         self.assertEqual(rpsbml.getName(), 'dummy')
 
-	'''
-    def test_score(self):
-        rpsbml = rpSBML('data/rp_1_11_sbml.xml')
-        rpsbml.compute_score()
-        self.assertEqual(rpsbml.getScore(), 0.6194499694153365)
-	'''
+    # def test_score(self):
+    #     rpsbml = rpSBML('data/rp_1_11_sbml.xml')
+    #     rpsbml.compute_score()
+    #     self.assertEqual(rpsbml.getScore(), 0.6194499694153365)
 
     def test_computeMeanRulesScore(self):
         self.assertAlmostEqual(self.rpsbml._computeMeanRulesScore(), 0.5684564101634014, places=7, message='Equal to 0.5684564101634014')
@@ -67,6 +67,8 @@ class Test_rpSBML(TestCase):
         self.assertCountEqual(self.rpsbml.getGroupsMembers('rp_pathway'), ['RP1', 'RP2', 'RP3'])
 
     def test_readRPspecies(self):
+        print(self.rpsbml.readRPspecies())
+        print(list(self.data.keys()))
         self.assertDictEqual(self.rpsbml.readRPspecies(), self.data['readrpspecies'])
 
     def test_readUniqueRPspecies(self):
