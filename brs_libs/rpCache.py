@@ -37,12 +37,12 @@ def build_parser():
     return add_arguments(argparse_ArgParser('Python script to pre-compute data'))
 
 
-## Class to generate the cache
-#
-# Contains all the functions that parse different files, used to calculate the thermodynamics and the FBA of the
-#the other steps. These should be called only when the files have changes
 class rpCache:
+    """Class to generate the cache
 
+    Contains all the functions that parse different files, used to calculate the thermodynamics and the FBA of the the other steps. These should be called only when the files have changes
+
+    """
     logger = logging_getLogger(__name__)
     # logger.info('Started instance of rpCache')
 
@@ -52,12 +52,12 @@ class rpCache:
     # static attribues
     _convertMNXM = {
         'MNXM162231': 'MNXM6',
-        'MNXM84': 'MNXM15',
-        'MNXM96410': 'MNXM14',
+        'MNXM84':     'MNXM15',
+        'MNXM96410':  'MNXM14',
         'MNXM114062': 'MNXM3',
         'MNXM145523': 'MNXM57',
-        'MNXM57425': 'MNXM9',
-        'MNXM137': 'MNXM588022'
+        'MNXM57425':  'MNXM9',
+        'MNXM137':    'MNXM588022'
         }
 
     # name: sha512sum
@@ -182,16 +182,25 @@ class rpCache:
     ################# ERROR functions ###################
     #####################################################
 
-    ## Error function for the convertion of structures
-    #
     class Error(Exception):
+        """Error function for the convertion of structures
+        """
         pass
 
 
-    ## Error function for the convertion of structures
-    #
     class DepictionError(Error):
+        """Error function for the convertion of structures
+        """
         def __init__(self, message):
+            """Constructor for the class
+
+            :param message: The error handling message string
+
+            :type message: str
+
+            :rtype: None
+            :return: None
+            """
             #self.expression = expression
             self.message = message
 
@@ -239,6 +248,14 @@ class rpCache:
         if not os_path.isfile(f_deprecatedCID_cid):
             print("   Generating data...", end = '', flush=True)
             deprecatedCID_cid = rpCache._m_deprecatedMNXM(input_dir+'chem_xref.tsv.gz')
+            #overwrite (or not if it dosn't exist) entries that are defined by Thomas
+            try:
+                user_mnx_replace = json.load(open('data/mnx_replace.json', 'r'))
+                for user_deprecated_mnxm in user_mnx_replace:
+                    deprecatedCID_cid[user_deprecated_mnxm] = user_mnx_replace[user_deprecated_mnxm]['mnx']
+            except FileNotFoundError:
+                print("   Error data/mnx_replace.json file not found")
+            self.mnx_replace[cid]['mnx']
             print_OK()
             print("   Writing data to file...", end = '', flush=True)
             rpCache._store_cache_to_file(deprecatedCID_cid, f_deprecatedCID_cid)
