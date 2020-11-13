@@ -10,14 +10,16 @@ from brs_libs import rpSBML
 from os       import path     as os_path
 from os       import makedirs as os_mkdirs
 from json     import load     as json_load
+from tempfile import TemporaryDirectory
 
 
 class Test_rpSBML(TestCase):
 
     def setUp(self):
         #load a rpSBML file
-        self.rpsbml = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'rpsbml.xml'))
-        self.ref_score = 0.5684564101634014
+        self.rpsbml       = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'rpsbml.xml'))
+        self.rpsbml_name  = 'RetroPath_Pathway_1_1'
+        self.rpsbml_score = 0.5684564101634014
         with open(os_path.join(os_path.dirname(__file__), 'data', 'data.json'), 'r') as f:
             self.data = json_load(f)
 
@@ -25,16 +27,15 @@ class Test_rpSBML(TestCase):
         rpsbml = rpSBML('rpSBML_test')
 
     def test_initWithInFile(self):
-        rpsbml = rpSBML('data/rp_1_11_sbml.xml')
-        self.assertEqual(self.rpsbml.getName(), 'RetroPath_Pathway_1_11')
+        self.assertEqual(self.rpsbml.getName(), self.rpsbml_name)
 
     def test_initWithDocument(self):
         rpsbml  = rpSBML(document=self.rpsbml.getDocument())
-        self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
+        self.assertEqual(rpsbml.getName(), self.rpsbml_name)
 
     def test_initWithModelName(self):
         rpsbml  = rpSBML(name=self.rpsbml.getName())
-        self.assertEqual(rpsbml.getName(), 'RetroPath_Pathway_1_11')
+        self.assertEqual(rpsbml.getName(), self.rpsbml_name)
 
     def test_initWithNothing(self):
         rpsbml  = rpSBML()
@@ -42,10 +43,7 @@ class Test_rpSBML(TestCase):
 
     def test_score(self):
         self.rpsbml.compute_score()
-        self.assertEqual(self.rpsbml.getScore(), self.ref_score)
-
-    def test_computeMeanRulesScore(self):
-        self.assertAlmostEqual(self.rpsbml._computeMeanRulesScore(), self.ref_score)
+        self.assertEqual(self.rpsbml.getScore(), self.rpsbml_score)
 
     '''
     def test_dictRPpathway(self):
@@ -56,7 +54,7 @@ class Test_rpSBML(TestCase):
         self.assertEqual(self.rpsbml._nameToSbmlId('test123-_!"£$%^&*(){}@~><>?'), 'test123___________________')
 
     def test_genMetaID(self):
-        self.assertEqual(self.rpsbml._genMetaID('test123'), 'cc03e747a6afbbcbf8be7668acfebee5')
+        self.assertEqual(self.rpsbml._genMetaID('test123'), 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae')
 
     def test_asDict(self):
         self.assertDictEqual(self.rpsbml.asDict(), self.data['asdict'])
@@ -68,8 +66,6 @@ class Test_rpSBML(TestCase):
         self.assertCountEqual(self.rpsbml.getGroupsMembers('rp_pathway'), ['RP1', 'RP2', 'RP3'])
 
     def test_readRPspecies(self):
-        print(self.rpsbml.readRPspecies())
-        print(list(self.data.keys()))
         self.assertDictEqual(self.rpsbml.readRPspecies(), self.data['readrpspecies'])
 
     def test_readUniqueRPspecies(self):
