@@ -581,7 +581,7 @@ class rpSBML:
         produced_species_nid = rpgraph.onlyProducedSpecies()
         if del_sp_pro:
             for pro in produced_species_nid:
-                rpSBML._checklibSBML(target_rpsbml.model.removeSpecies(pro), 'removing the following product species: '+str(pro))
+                rpSBML._checklibSBML(target_rpsbml.getModel().removeSpecies(pro), 'removing the following product species: '+str(pro))
         else:
             for pro in produced_species_nid:
                 step = {'rule_id': None,
@@ -602,7 +602,7 @@ class rpSBML:
                                       compartment_id)
         if del_sp_react:
             for react in consumed_species_nid:
-                rpSBML._checklibSBML(target_rpsbml.model.removeSpecies(react), 'removing the following reactant species: '+str(react))
+                rpSBML._checklibSBML(target_rpsbml.getmodel().removeSpecies(react), 'removing the following reactant species: '+str(react))
         else:
             for react in consumed_species_nid:
                 step = {'rule_id': None,
