@@ -250,12 +250,11 @@ class rpCache:
             deprecatedCID_cid = rpCache._m_deprecatedMNXM(input_dir+'chem_xref.tsv.gz')
             #overwrite (or not if it dosn't exist) entries that are defined by Thomas
             try:
-                user_mnx_replace = json.load(open('data/mnx_replace.json', 'r'))
+                user_mnx_replace = json_load(open('data/mnx_replace.json', 'r'))
                 for user_deprecated_mnxm in user_mnx_replace:
                     deprecatedCID_cid[user_deprecated_mnxm] = user_mnx_replace[user_deprecated_mnxm]['mnx']
             except FileNotFoundError:
                 print("   Error data/mnx_replace.json file not found")
-            self.mnx_replace[cid]['mnx']
             print_OK()
             print("   Writing data to file...", end = '', flush=True)
             rpCache._store_cache_to_file(deprecatedCID_cid, f_deprecatedCID_cid)

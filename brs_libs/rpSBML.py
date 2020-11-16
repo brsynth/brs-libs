@@ -160,13 +160,9 @@ class rpSBML:
 
         :param source_rpsbml: The source rpSBML object
         :param target_rpsbml: The target rpSBML object
-        :param del_sp_react: Delete the single parent reactants. If False a reaction is created that produces the reactant
-        :param del_sp_pro: Delete the single parent products. If False a reactions is created that consumes the product
 
         :type source_rpsbml: rpSBML
         :type target_rpsbml: rpSBML
-        :type del_sp_react: bool
-        :type del_sp_pro: bool
 
         :return: Tuple of dict where the first entry is the species source to target conversion and the second is the reaction source to target conversion
         :rtype: tuple
@@ -551,8 +547,6 @@ class rpSBML:
         """Check if there are any single parent species in a heterologous pathways and if there are, either delete them or add reaction to complete the heterologous pathway
 
         :param rpsbml: The rpSBML object
-        :param del_sp_pro: Define if to delete the products or create reaction that consume it
-        :param del_sp_react: Define if to delete the reactants or create reaction that produce it
         :param upper_flux_bound: The upper flux bounds unit definitions default when adding new reaction (Default: 999999.0)
         :param lower_flux_bound: The lower flux bounds unit definitions default when adding new reaction (Defaul: 0.0)
         :param compartment_id: The id of the model compartment
@@ -561,8 +555,6 @@ class rpSBML:
         :param sink_species_group_id: The sink specues Groups id (Default: sink_species_group_id)
 
         :type rpsbml: rpSBML
-        :type del_sp_pro: bool
-        :type del_sp_react: bool
         :type upper_flux_bound: float
         :type lower_flux_bound: float
         :type compartment_id: str
