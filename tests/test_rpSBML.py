@@ -71,6 +71,43 @@ class Test_rpSBML(TestCase):
     def test_readUniqueRPspecies(self):
         self.assertCountEqual(self.rpsbml.readUniqueRPspecies(), ['TARGET_0000000001__64__MNXC3', 'MNXM13__64__MNXC3', 'CMPD_0000000004__64__MNXC3', 'MNXM1__64__MNXC3', 'MNXM20__64__MNXC3', 'CMPD_0000000013__64__MNXC3', 'MNXM89557__64__MNXC3', 'MNXM5__64__MNXC3', 'MNXM7__64__MNXC3', 'MNXM9__64__MNXC3', 'MNXM6__64__MNXC3', 'MNXM3__64__MNXC3'])
 
+    def test_speciesExists(self):
+        self.assertTrue(self.rpsbml.speciesExists('MNXM89557'))
+        self.assertFalse(self.rpsbml.speciesExists('test'))
+
+    def test_isSpeciesProduct(self):
+        self.assertTrue(self.rpsbml.isSpeciesProduct('TARGET_0000000001__64__MNXC3'))
+        self.assertFalse(self.rpsbml.isSpeciesProduct('MNXM1__64__MNXC3'))
+
+    def test_compareBRSYNTHAnnotations(self):
+        self.assertTrue(self.rpsbml.compareBRSYNTHAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation()))
+        self.assertFalse(self.rpsbml.compareBRSYNTHAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('CMPD_0000000013__64__MNXC3').getAnnotation()))
+        self.assertFalse(self.gem.compareBRSYNTHAnnotations(self.gem.model.getSpecies('M_2pg_c').getAnnotation(), self.gem.model.getSpecies('M_13dpg_c').getAnnotation()))
+
+    def test_compareMIRIAMAnnotations(self):
+        self.assertTrue(self.rpsbml.compareMIRIAMAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation()))
+        self.assertFalse(self.rpsbml.compareMIRIAMAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('CMPD_0000000013__64__MNXC3').getAnnotation()))
+
+    def test_createReturnFluxParameter(self):
+        #return feature
+        param = self.rpsbml.createReturnFluxParameter(None, parameter_id='B_999999')
+        self.assertEqual(param.id, 'B_999999')
+        self.assertEqual(param.value, 999999.0)
+        #create feature
+        new = rpSBML('test')
+        new.createModel('test_name', 'test_id')
+        param = new.createReturnFluxParameter(8888.0)
+        self.assertEqual(param.id, 'B_8888_0')
+        self.assertEqual(param.value, 8888.0)
+
+    def test_readMIRIAMAnnotation(self):
+        self.assertDictEqual(self.rpsbml.readMIRIAMAnnotation(self.rpsbml.model.getReaction('RP1').getAnnotation()), {'ec-code': ['4.1.1.17']})
+        self.assertDictEqual(self.gem.readMIRIAMAnnotation(self.gem.model.getReaction('R_ALATA_D2').getAnnotation()), {'bigg': ['ALATA_D2'], 'biocyc': ['RXN0-5240'], 'kegg': ['R01147'], 'metanetx': ['MNXR95697'], 'rhea': ['28562', '28563', '28564', '28565']})
+
+    def test_readReactionSpecies(self):
+        self.assertDictEqual(self.rpsbml.readReactionSpecies(self.rpsbml.model.getReaction('RP1')), {'left': {'CMPD_0000000004__64__MNXC3': 1, 'MNXM1__64__MNXC3': 1}, 'right': {'TARGET_0000000001__64__MNXC3': 1, 'MNXM13__64__MNXC3': 1}})
+
+
     def test_mergeSBMLFiles(self):
         with TemporaryDirectory() as tempd:
             outfile = tempd+'/merged_sbml.xml'
