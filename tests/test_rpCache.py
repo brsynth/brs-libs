@@ -21,7 +21,7 @@ class Test_rpCache(TestCase):
         """
         self.skipTest("Tool long, not in standard tests")
         rpcache = rpCache('localhost')
-        for attr,length in self.attributes:
+        for attr, length in self.attributes:
             with self.subTest(attr=attr, length=length):
                 self.assertEqual(len(rpcache.get(attr)), length)
 
@@ -32,7 +32,7 @@ class Test_rpCache(TestCase):
         attribute, compare its length with it is supposed to be.
         """
         rpcache = rpCache('file')
-        for attr,length in self.attributes:
+        for attr, length in self.attributes:
             with self.subTest(attr=attr, length=length):
                 self.assertEqual(len(rpcache.get(attr)), length)
 
@@ -42,7 +42,7 @@ class Test_rpCache(TestCase):
         Method: Load a rpCache in 'file' store mode for each single attribute.
         Then, compare its length with it is supposed to be.
         """
-        for attr,length in self.attributes:
+        for attr, length in self.attributes:
             with self.subTest(attr=attr, length=length):
                 rpcache = rpCache('file', [attr])
                 print(attr, rpcache.__dict__)
@@ -56,7 +56,7 @@ class Test_rpCache(TestCase):
         """
         self.skipTest("Tool long, not in standard tests")
         rpCache.generate_cache(self.outdir)
-        for file,size in self.files:
+        for file, size in self.files:
             outfile = extract_gz(file, self.outdir)
             self.assertTrue(Main._check_file_size(outfile, size))
             os_rm(outfile)

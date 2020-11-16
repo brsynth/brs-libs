@@ -8,7 +8,6 @@ from _main    import Main
 from unittest import TestCase
 from brs_libs import rpSBML
 from os       import path     as os_path
-from os       import makedirs as os_mkdirs
 from json     import load     as json_load
 from tempfile import TemporaryDirectory
 
@@ -16,7 +15,7 @@ from tempfile import TemporaryDirectory
 class Test_rpSBML(TestCase):
 
     def setUp(self):
-        #load a rpSBML file
+        # load a rpSBML file
         self.rpsbml       = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'rpsbml.xml'))
         self.rpsbml_name  = 'RetroPath_Pathway_1_1'
         self.rpsbml_score = 0.5684564101634014
@@ -24,7 +23,7 @@ class Test_rpSBML(TestCase):
             self.data = json_load(f)
 
     def test_initEmpty(self):
-        rpsbml = rpSBML('rpSBML_test')
+        rpSBML('rpSBML_test')
 
     def test_initWithInFile(self):
         self.assertEqual(self.rpsbml.getName(), self.rpsbml_name)
