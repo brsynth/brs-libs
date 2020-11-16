@@ -151,7 +151,7 @@ class rpSBML:
     @staticmethod
     #TODO: add a confidence in the merge using the score in
     #TODO: seperate the different parts so that others may use it
-    def mergeModels(source_rpsbml, target_rpsbml, del_sp_react=False, del_sp_pro=False):
+    def mergeModels(source_rpsbml, target_rpsbml):
         """Merge two models species and reactions using the annotations to recognise the same species and reactions
 
         The source model has to have both the GROUPS and FBC packages enabled in its SBML. The course must have a groups
@@ -341,7 +341,7 @@ class rpSBML:
                     continue
                     #logging.warning('Source species '+str(member.getIdRef())+' has been created in the target model')
                 elif len(list_species)>1:
-                    logging.warning('There are multiple matches to the species '+str(member.getIdRef())+'... taking the first one: '+str(list_species))
+                    logging.warning('There are multiple matches to the species '+str(source_species)+'... taking the first one: '+str(list_species))
                 #TODO: loop throught the annotations and replace the non-overlapping information
                 target_member = target_rpsbml.getModel().getSpecies(list_species[0])
                 source_member = source_rpsbml.getModel().getSpecies(source_species)
@@ -533,18 +533,15 @@ class rpSBML:
                         new_member = target_group.createMember()
                         rpSBML._checklibSBML(new_member, 'Creating a new groups member')
                         rpSBML._checklibSBML(new_member.setIdRef(member.getIdRef()), 'Setting name to the groups member')
-
         ###### TITLES #####
         target_rpsbml.getModel().setId(target_rpsbml.getModel().getId()+'__'+source_rpsbml.getModel().getId())
         target_rpsbml.getModel().setName(target_rpsbml.getModel().getName()+' merged with '+source_rpsbml.getModel().getId())
-        rpSBML._checkSingleParent(target_rpsbml, del_sp_pro, del_sp_react)
+        rpSBML._checkSingleParent(target_rpsbml)
         return species_source_target, reactions_source_target
 
 
     @staticmethod
     def _checkSingleParent(rpsbml,
-                           del_sp_pro=False,
-                           del_sp_react=False,
                            upper_flux_bound=999999.0,
                            lower_flux_bound=0.0,
                            compartment_id='MNXM3',
@@ -579,48 +576,40 @@ class rpSBML:
         rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id)
         consumed_species_nid = rpgraph.onlyConsumedSpecies()
         produced_species_nid = rpgraph.onlyProducedSpecies()
-        if del_sp_pro:
-            for pro in produced_species_nid:
-                rpSBML._checklibSBML(target_rpsbml.model.removeSpecies(pro), 'removing the following product species: '+str(pro))
-        else:
-            for pro in produced_species_nid:
-                step = {'rule_id': None,
-                        'left': {pro.split('__')[0]: 1},
-                        'right': {},
-                        'step': None,
-                        'sub_step': None,
-                        'path_id': None,
-                        'transformation_id': None,
-                        'rule_score': None,
-                        'rule_ori_reac': None}
-                #note that here the pathwats are passed as NOT being part of the heterologous pathways and
-                #thus will be ignored when/if we extract the rp_pathway from the full GEM model
-                rpsbml.createReaction(pro+'__consumption',
-                                      upper_flux_bound,
-                                      lower_flux_bound,
-                                      step,
-                                      compartment_id)
-        if del_sp_react:
-            for react in consumed_species_nid:
-                rpSBML._checklibSBML(target_rpsbml.model.removeSpecies(react), 'removing the following reactant species: '+str(react))
-        else:
-            for react in consumed_species_nid:
-                step = {'rule_id': None,
-                        'left': {},
-                        'right': {react.split('__')[0]: 1},
-                        'step': None,
-                        'sub_step': None,
-                        'path_id': None,
-                        'transformation_id': None,
-                        'rule_score': None,
-                        'rule_ori_reac': None}
-                #note that here the pathwats are passed as NOT being part of the heterologous pathways and
-                #thus will be ignored when/if we extract the rp_pathway from the full GEM model
-                rpsbml.createReaction(react+'__production',
-                                      upper_flux_bound,
-                                      lower_flux_bound,
-                                      step,
-                                      compartment_id)
+        for pro in produced_species_nid:
+            step = {'rule_id': None,
+                    'left': {pro.split('__')[0]: 1},
+                    'right': {},
+                    'step': None,
+                    'sub_step': None,
+                    'path_id': None,
+                    'transformation_id': None,
+                    'rule_score': None,
+                    'rule_ori_reac': None}
+            #note that here the pathwats are passed as NOT being part of the heterologous pathways and
+            #thus will be ignored when/if we extract the rp_pathway from the full GEM model
+            rpsbml.createReaction(pro+'__consumption',
+                                  upper_flux_bound,
+                                  lower_flux_bound,
+                                  step,
+                                  compartment_id)
+        for react in consumed_species_nid:
+            step = {'rule_id': None,
+                    'left': {},
+                    'right': {react.split('__')[0]: 1},
+                    'step': None,
+                    'sub_step': None,
+                    'path_id': None,
+                    'transformation_id': None,
+                    'rule_score': None,
+                    'rule_ori_reac': None}
+            #note that here the pathwats are passed as NOT being part of the heterologous pathways and
+            #thus will be ignored when/if we extract the rp_pathway from the full GEM model
+            rpsbml.createReaction(react+'__production',
+                                  upper_flux_bound,
+                                  lower_flux_bound,
+                                  step,
+                                  compartment_id)
         return True
 
 
