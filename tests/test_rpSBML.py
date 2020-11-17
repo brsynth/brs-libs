@@ -22,9 +22,8 @@ class Test_rpSBML(TestCase):
 
     def setUp(self):
         # load a rpSBML file
-        self.rpsbml       = rpSBML(os_path.join(os_path.dirname(__file__),
-                                                'data',
-                                                'rpsbml.xml'))
+        self.rpsbml       = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'rpsbml.xml'))
+        self.gem          = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'gem.xml'))
         self.rpsbml_name  = 'RetroPath_Pathway_1_1'
         self.rpsbml_score = 0.5684564101634014
         with open(os_path.join(os_path.dirname(__file__), 'data', 'data.json'),
