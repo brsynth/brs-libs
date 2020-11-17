@@ -9,6 +9,7 @@ from _main     import Main
 from brs_libs  import rpCache
 from brs_utils import extract_gz
 from os        import remove as os_rm
+from os        import path as os_path
 
 
 class Test_rpCache(TestCase):
@@ -66,17 +67,17 @@ class Test_rpCache(TestCase):
     # Not possible to compare hashes since files contain dict that have to be sorted before comparing them and then fill up the memory
     # Size of gunzipped files
     files = [
-    (outdir+'/'+'chebi_cid.json.gz', 2786801),
-    (outdir+'/'+'cid_name.json.gz', 55787548),
-    (outdir+'/'+'cid_strc.json.gz', 296896910),
-    (outdir+'/'+'cid_xref.json.gz', 88383985),
-    (outdir+'/'+'comp_xref.json.gz', 51059),
-    (outdir+'/'+'deprecatedCID_cid.json.gz', 423443),
-    (outdir+'/'+'deprecatedCompID_compid.json.gz', 89832),
-    (outdir+'/'+'deprecatedRID_rid.json.gz', 1437122),
-    (outdir+'/'+'inchikey_cid.json.gz', 20071352),
-    (outdir+'/'+'rr_full_reactions.json.gz', 7643885),
-    (outdir+'/'+'rr_reactions.json.gz', 84656878)
+    (os_path.join(outdir, 'chebi_cid.json.gz'              ), 2786801),
+    (os_path.join(outdir, 'cid_name.json.gz'               ), 55787548),
+    (os_path.join(outdir, 'cid_strc.json.gz'               ), 296896910),
+    (os_path.join(outdir, 'cid_xref.json.gz'               ), 88383985),
+    (os_path.join(outdir, 'comp_xref.json.gz'              ), 51059),
+    (os_path.join(outdir, 'deprecatedCID_cid.json.gz'      ), 423443),
+    (os_path.join(outdir, 'deprecatedCompID_compid.json.gz'), 89832),
+    (os_path.join(outdir, 'deprecatedRID_rid.json.gz'      ), 1437122),
+    (os_path.join(outdir, 'inchikey_cid.json.gz'           ), 20071352),
+    (os_path.join(outdir, 'rr_full_reactions.json.gz'      ), 7643885),
+    (os_path.join(outdir, 'rr_reactions.json.gz'           ), 84656878)
     ]
 
     attributes = [
