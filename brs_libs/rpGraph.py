@@ -10,7 +10,7 @@ import random
 class rpGraph:
     """The class that hosts the networkx related functions
     """
-    def __init__(self, rpsbml=None, is_gem_sbml=False, pathway_id='rp_pathway', central_species_group_id='central_species', sink_species_group_id='rp_sink_species_id'):
+    def __init__(self, rpsbml=None, is_gem_sbml=False, pathway_id='rp_pathway', central_species_group_id='central_species', sink_species_group_id='rp_sink_species'):
         """Constructor of the class
 
         Automatically constructs the network when calling the construtor
