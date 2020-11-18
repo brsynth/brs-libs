@@ -130,7 +130,7 @@ class rpGraph:
         """
         only_consumed_species = []
         for node_name in self.G.nodes():
-            node = self.G.node.get(node_name)
+            node = self.G.nodes.get(node_name)
             if node['type']=='species':
                 #NOTE: if central species then must also be rp_pathway species
                 if (only_central and node['central_species']==True) or (only_rp_pathway and node['rp_pathway']==True) or (not only_central and not only_rp_pathway):
@@ -151,7 +151,7 @@ class rpGraph:
         """
         only_produced_species = []
         for node_name in self.G.nodes():
-            node = self.G.node.get(node_name)
+            node = self.G.nodes.get(node_name)
             self.logger.debug('node_name: '+str(node_name))
             self.logger.debug('node: '+str(node))
             if node['type']=='species':
@@ -162,7 +162,7 @@ class rpGraph:
         return only_produced_species
 
 
-    ## Recursive function that finds the order of the reactions in the graph 
+    ## Recursive function that finds the order of the reactions in the graph
     #
     # NOTE: only works for linear pathways... need to find a better way ie. Tree's
     #
@@ -183,7 +183,7 @@ class rpGraph:
             #can be multiple reactions at a given step
             multi_reac = []
             for n_n in succ_node_list:
-                n = self.G.node.get(n_n)
+                n = self.G.nodes.get(n_n)
                 if n['type']=='reaction':
                     if not n_n in flat_reac_list:
                         multi_reac.append(n_n)
@@ -196,7 +196,7 @@ class rpGraph:
             self.logger.debug('current_reac_list: '+str(current_reac_list))
             #loop through all the possibilities
             for n_n in succ_node_list:
-                n = self.G.node.get(n_n)
+                n = self.G.nodes.get(n_n)
                 if n['type']=='reaction':
                     if n_n in multi_reac:
                         self._recursiveReacSuccessors(n_n, current_reac_list, all_res, num_reactions)
@@ -226,7 +226,7 @@ class rpGraph:
             #can be multiple reactions at a given step
             multi_reac = []
             for n_n in pred_node_list:
-                n = self.G.node.get(n_n)
+                n = self.G.nodes.get(n_n)
                 if n['type']=='reaction':
                     if not n_n in flat_reac_list:
                         multi_reac.append(n_n)
@@ -239,7 +239,7 @@ class rpGraph:
             self.logger.debug('current_reac_list: '+str(current_reac_list))
             #loop through all the possibilities
             for n_n in pred_node_list:
-                n = self.G.node.get(n_n)
+                n = self.G.nodes.get(n_n)
                 if n['type']=='reaction':
                     if n_n in multi_reac:
                         self._recursiveReacPredecessors(n_n, current_reac_list, all_res, num_reactions)
@@ -280,7 +280,7 @@ class rpGraph:
         if pred_node_list==[]:
             return reac_list
         for n_n in pred_node_list:
-            n = self.G.node.get(n_n)
+            n = self.G.nodes.get(n_n)
             if n['type']=='reaction':
                 if n_n in reac_list:
                     return reac_list
@@ -355,5 +355,3 @@ class rpGraph:
                 self.logger.debug('Found solution: '+str(succ_res))
                 return succ_res
         return []
-
-
