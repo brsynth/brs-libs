@@ -4,11 +4,6 @@ Created on June 17 2020
 @author: Joan Hérisson
 """
 
-<<<<<<< HEAD
-=======
-import sys
-
->>>>>>> dev
 from _main    import Main
 from unittest import TestCase
 from brs_libs import rpSBML
