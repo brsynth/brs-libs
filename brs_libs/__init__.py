@@ -5,10 +5,11 @@ Created on Sep 09 2020
 """
 
 from brs_libs.rpSBML         import rpSBML
+from brs_libs.rpGraph        import rpGraph
 from brs_libs.rpCache        import rpCache
 from brs_libs.rpCache        import add_arguments as rpCache_add_args
 from brs_libs.inchikeyMIRIAM import inchikeyMIRIAM
 
-__all__ = ['rpSBML',
+__all__ = ['rpSBML', 'rpGraph',
            'rpCache', 'rpCache_add_args',
            'inchikeyMIRIAM']
