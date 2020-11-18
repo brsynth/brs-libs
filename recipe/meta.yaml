@@ -26,7 +26,7 @@ requirements:
     - requests
     - colored
     - rdkit==2020.03.6
-    - networkx==2.3
+    - networkx
 
 test:
   source_files:
