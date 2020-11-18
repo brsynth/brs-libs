@@ -4,9 +4,6 @@ Created on June 17 2020
 @author: Joan Hérisson
 """
 
-import sys
-sys.path.append('../')
-
 from _main    import Main
 from unittest import TestCase
 from brs_libs import rpSBML
