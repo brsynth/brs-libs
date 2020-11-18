@@ -2105,7 +2105,7 @@ class rpSBML:
             else:
                 toRet[ann.getName()] = ann.getChild(0).toXMLString()
         # to delete empty
-        return {k: v for k, v in toRet.items() if v is not None}
+        return {k: v for k, v in toRet.items() if v}
         # return toRet
 
 
@@ -2302,8 +2302,9 @@ class rpSBML:
                 pass
         # list the common keys between the two
         for same_key in list(set(list(source_dict.keys())).intersection(list(target_dict.keys()))):
-            if source_dict[same_key]==target_dict[same_key]:
-                return True
+            if source_dict[same_key] and target_dict[same_key]:
+                if source_dict[same_key]==target_dict[same_key]:
+                    return True
         return False
 
 

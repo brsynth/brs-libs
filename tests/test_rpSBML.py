@@ -4,6 +4,11 @@ Created on June 17 2020
 @author: Joan Hérisson
 """
 
+<<<<<<< HEAD
+=======
+import sys
+
+>>>>>>> dev
 from _main    import Main
 from unittest import TestCase
 from brs_libs import rpSBML
@@ -24,7 +29,8 @@ class Test_rpSBML(TestCase):
         self.gem          = rpSBML(os_path.join(os_path.dirname(__file__), 'data', 'gem.xml'))
         self.rpsbml_name  = 'RetroPath_Pathway_1_1'
         self.rpsbml_score = 0.5684564101634014
-        with open(os_path.join(os_path.dirname(__file__), 'data', 'data.json'), 'r') as f:
+        with open(os_path.join(os_path.dirname(__file__), 'data', 'data.json'),
+                  'r') as f:
             self.data = json_load(f)
 
     def test_initEmpty(self):
@@ -84,13 +90,13 @@ class Test_rpSBML(TestCase):
         self.assertFalse(self.rpsbml.isSpeciesProduct('MNXM1__64__MNXC3'))
 
     def test_compareBRSYNTHAnnotations(self):
-        self.assertTrue(self.rpsbml.compareBRSYNTHAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation()))
-        self.assertFalse(self.rpsbml.compareBRSYNTHAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('CMPD_0000000013__64__MNXC3').getAnnotation()))
-        self.assertFalse(self.gem.compareBRSYNTHAnnotations(self.gem.model.getSpecies('M_2pg_c').getAnnotation(), self.gem.model.getSpecies('M_13dpg_c').getAnnotation()))
+        self.assertTrue(self.rpsbml.compareBRSYNTHAnnotations(self.rpsbml.getModel().getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.getModel().getSpecies('MNXM89557__64__MNXC3').getAnnotation()))
+        self.assertFalse(self.rpsbml.compareBRSYNTHAnnotations(self.rpsbml.getModel().getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.getModel().getSpecies('CMPD_0000000013__64__MNXC3').getAnnotation()))
+        self.assertFalse(self.gem.compareBRSYNTHAnnotations(self.gem.getModel().getSpecies('M_2pg_c').getAnnotation(), self.gem.getModel().getSpecies('M_13dpg_c').getAnnotation()))
 
     def test_compareMIRIAMAnnotations(self):
-        self.assertTrue(self.rpsbml.compareMIRIAMAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation()))
-        self.assertFalse(self.rpsbml.compareMIRIAMAnnotations(self.rpsbml.model.getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.model.getSpecies('CMPD_0000000013__64__MNXC3').getAnnotation()))
+        self.assertTrue(self.rpsbml.compareMIRIAMAnnotations(self.rpsbml.getModel().getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.getModel().getSpecies('MNXM89557__64__MNXC3').getAnnotation()))
+        self.assertFalse(self.rpsbml.compareMIRIAMAnnotations(self.rpsbml.getModel().getSpecies('MNXM89557__64__MNXC3').getAnnotation(), self.rpsbml.getModel().getSpecies('CMPD_0000000013__64__MNXC3').getAnnotation()))
 
     def test_createReturnFluxParameter(self):
         #return feature
@@ -105,12 +111,11 @@ class Test_rpSBML(TestCase):
         self.assertEqual(param.value, 8888.0)
 
     def test_readMIRIAMAnnotation(self):
-        self.assertDictEqual(self.rpsbml.readMIRIAMAnnotation(self.rpsbml.model.getReaction('RP1').getAnnotation()), {'ec-code': ['4.1.1.17']})
-        self.assertDictEqual(self.gem.readMIRIAMAnnotation(self.gem.model.getReaction('R_ALATA_D2').getAnnotation()), {'bigg': ['ALATA_D2'], 'biocyc': ['RXN0-5240'], 'kegg': ['R01147'], 'metanetx': ['MNXR95697'], 'rhea': ['28562', '28563', '28564', '28565']})
+        self.assertDictEqual(self.rpsbml.readMIRIAMAnnotation(self.rpsbml.getModel().getReaction('RP1').getAnnotation()), {'ec-code': ['4.1.1.17']})
+        self.assertDictEqual(self.gem.readMIRIAMAnnotation(self.gem.getModel().getReaction('R_ALATA_D2').getAnnotation()), {'bigg': ['ALATA_D2'], 'biocyc': ['RXN0-5240'], 'kegg': ['R01147'], 'metanetx': ['MNXR95697'], 'rhea': ['28562', '28563', '28564', '28565']})
 
     def test_readReactionSpecies(self):
-        self.assertDictEqual(self.rpsbml.readReactionSpecies(self.rpsbml.model.getReaction('RP1')), {'left': {'CMPD_0000000004__64__MNXC3': 1, 'MNXM1__64__MNXC3': 1}, 'right': {'TARGET_0000000001__64__MNXC3': 1, 'MNXM13__64__MNXC3': 1}})
-
+        self.assertDictEqual(self.rpsbml.readReactionSpecies(self.rpsbml.getModel().getReaction('RP1')), {'left': {'CMPD_0000000004__64__MNXC3': 1, 'MNXM1__64__MNXC3': 1}, 'right': {'TARGET_0000000001__64__MNXC3': 1, 'MNXM13__64__MNXC3': 1}})
 
     def test_mergeSBMLFiles(self):
         with NamedTemporaryFile() as tempf:
