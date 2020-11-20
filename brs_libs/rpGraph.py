@@ -7,6 +7,14 @@ import numpy as np
 import random
 
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    #level=logging.WARNING,
+    #level=logging.ERROR,
+    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    datefmt='%d-%m-%Y %H:%M:%S',
+)
+
 class rpGraph:
     """The class that hosts the networkx related functions
     """
@@ -47,7 +55,7 @@ class rpGraph:
 
 
     #TODO: add the compartments to the species and reactions node descriptions
-    def _makeGraph(self, is_gem_sbml=False, pathway_id='rp_pathway', central_species_group_id='central_species', sink_species_group_id='rp_sink_species_id'):
+    def _makeGraph(self, is_gem_sbml=False, pathway_id='rp_pathway', central_species_group_id='central_species', sink_species_group_id='rp_sink_species'):
         """Private function that constructs the networkx graph
 
         :param is_gem_sbml: Determine what type of graph to build. If True then all the species and reactions will be added and not just the heterologous pathway.
@@ -69,7 +77,8 @@ class rpGraph:
         rp_sink_species_id = [i.getIdRef() for i in s_s.getListOfMembers()]
         rp_pathway = groups.getGroup(pathway_id)
         rp_species_id = self.rpsbml.readUniqueRPspecies(pathway_id)
-        rp_reactions_id = rp_pathway.getListOfMembers()
+        rp_reactions_id = [i.getIdRef() for i in rp_pathway.getListOfMembers()]
+        logging.debug('rp_reactions_id: '+str(rp_reactions_id))
         self.G = nx.DiGraph(brsynth=self.rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation()))
         #### add ALL the species and reactions ####
         #nodes
@@ -107,12 +116,15 @@ class rpGraph:
                                 rp_pathway=is_rp_pathway)
         #edges
         for reaction in rpsbml_model.getListOfReactions():
+            logging.debug('Adding edges for the reaction: '+str(reaction.getId()))
             if reaction.getId() in rp_reactions_id or is_gem_sbml:
                 for reac in reaction.getListOfReactants():
+                    logging.debug('\taAdding edge '+str(reac.species)+' --> '+str(reaction.getId()))
                     self.G.add_edge(reac.species,
                                     reaction.getId(),
                                     stoichio=reac.stoichiometry)
                 for prod in reaction.getListOfProducts():
+                    logging.debug('\taAdding edge '+str(reaction.getId())+' --> '+str(prod.species))
                     self.G.add_edge(reaction.getId(),
                                     prod.species,
                                     stoichio=reac.stoichiometry)
