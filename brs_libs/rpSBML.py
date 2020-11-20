@@ -1827,7 +1827,6 @@ class rpSBML:
             out_filename = filename
         else:
             out_filename = str(self.getName())+ext+'.xml'
-        print(out_filename, self.getDocument())
         libsbml.writeSBMLToFile(self.getDocument(), out_filename)
         return True
 
