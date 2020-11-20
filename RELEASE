@@ -1,3 +1,8 @@
+1.0.0 - Nov 20, 2020
+    - add rpGraph with tests
+    - add addiotional rpSBML tests
+    - replace "+'/'+" with "os.path.join()" to be compliant with non-UNIX computers
+
 0.5.1 - Nov 2, 2020
     - add 'ci' toolkit for developpers
     - rpSBML: handling parameters and modelName handling
