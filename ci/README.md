@@ -20,7 +20,7 @@ This CI toolkit is designed to provide full development chain for a conda packag
 
 Requirements can be provided by a docker container by running the following commands (at package root folder):
 ```bash
-docker run -it --rm -v $PWD:$PWD:ro -w $PWD continuumio/miniconda3 bash
+docker run -it --rm -v $PWD:$PWD -w $PWD continuumio/miniconda3 bash
 conda update --all -y
 conda install -y make
 cd ci
