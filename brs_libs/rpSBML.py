@@ -532,7 +532,7 @@ class rpSBML:
         ###### TITLES #####
         target_rpsbml.getModel().setId(target_rpsbml.getModel().getId()+'__'+source_rpsbml.getModel().getId())
         target_rpsbml.getModel().setName(target_rpsbml.getModel().getName()+' merged with '+source_rpsbml.getModel().getId())
-        rpSBML._checkSingleParent(target_rpsbml)
+        #rpSBML._checkSingleParent(target_rpsbml)
         return species_source_target, reactions_source_target
 
 
