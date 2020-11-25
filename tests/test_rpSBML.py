@@ -165,7 +165,18 @@ class Test_rpSBML(TestCase):
             rpSBML.mergeSBMLFiles(os_path.join('data', 'rpsbml.xml'),
                                   os_path.join('data', 'e_coli_model.sbml'),
                                   tempf.name)
-            self.assertTrue(Main._check_file_hash(tempf.name, 'e36cd98da717db385e42a15c901257192a6b1b1c861d9b4e5a56b052229a1e88'))
+            #TODO: test that the rpsbml values have been passed to the new value
+            tmpmerge = rpSBML('/home/mdulac/workspace/brsynth/brs-libs/tests/data/tmp_merge.xml')
+            model = tmpmerge.getModel()
+            #test to see that there is a reaction rpsbml
+            rp_reac = model.getReaction('RP1')
+            self.assertIsNotNone(rp_reac)
+            rp_spe = model.getSpecies('CMPD_0000000013__64__MNXC3')
+            self.assertIsNotNone(rp_spe)
+            gem_reac = model.getReaction('R_ALATA_D2')
+            self.assertIsNotNone(gem_reac)
+            gem_spe = model.getSpecies('M_pydx5p_c')
+            self.assertIsNotNone(gem_spe)
 
     def test_print_rpSBML(self):
         rpsbml = rpSBML(name='rpSBML_test')
