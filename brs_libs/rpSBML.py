@@ -2959,6 +2959,7 @@ class rpSBML:
             self.addUpdateBRSynth(spe, 'inchi', inchi, None, True, False, False, meta_id)
         if inchikey:
             self.addUpdateBRSynth(spe, 'inchikey', inchikey, None, True, False, False, meta_id)
+            self.addUpdateMIRIAM(spe, 'species', {'inchikey': [inchikey]})
         #### GROUPS #####
         # TODO: check that it actually exists
         if species_group_id:
