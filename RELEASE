@@ -1,3 +1,7 @@
+1.1.0 - Nov 20, 2020
+    - add convertToCobra() function
+    - rename '_checklibSBML()' function into 'checklibSBML()'
+
 1.0.0 - Nov 20, 2020
     - add rpGraph with tests
     - add addiotional rpSBML tests
