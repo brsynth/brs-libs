@@ -13,6 +13,8 @@ from inspect  import ismethod   as inspect_ismethod
 from tempfile import TemporaryDirectory
 from tarfile  import open       as tar_open
 from brs_libs import rpGraph
+from cobra    import io            as cobra_io
+from cobra    import flux_analysis as cobra_flux_analysis
 
 ## @package RetroPath SBML writer
 # Documentation for SBML representation of the different model
@@ -171,13 +173,13 @@ class rpSBML:
         #Find the ID's of the similar target_rpsbml.model species
         ################ MODEL FBC ########################
         if not target_rpsbml.getModel().isPackageEnabled('fbc'):
-            rpSBML._checklibSBML(target_rpsbml.getModel().enablePackage(
+            rpSBML.checklibSBML(target_rpsbml.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
                     'Enabling the FBC package')
         if not source_rpsbml.getModel().isPackageEnabled('fbc'):
-            rpSBML._checklibSBML(source_rpsbml.getModel().enablePackage(
+            rpSBML.checklibSBML(source_rpsbml.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
@@ -185,7 +187,7 @@ class rpSBML:
         target_fbc = target_rpsbml.getModel().getPlugin('fbc')
         source_fbc = source_rpsbml.getModel().getPlugin('fbc')
         # note sure why one needs to set this as False
-        rpSBML._checklibSBML(source_rpsbml.document.setPackageRequired('fbc', False), 'enabling FBC package')
+        rpSBML.checklibSBML(source_rpsbml.document.setPackageRequired('fbc', False), 'enabling FBC package')
         ################ UNITDEFINITIONS ######
         # return the list of unit definitions id's for the target to avoid overwritting
         # WARNING: this means that the original unit definitions will be prefered over the new one
@@ -194,23 +196,23 @@ class rpSBML:
             if not source_unitDef.getId() in target_unitDefID: # have to compare by ID since no annotation
                 # create a new unitDef in the target
                 target_unitDef = target_rpsbml.getModel().createUnitDefinition()
-                rpSBML._checklibSBML(target_unitDef, 'fetching target unit definition')
+                rpSBML.checklibSBML(target_unitDef, 'fetching target unit definition')
                 #copy unitDef info to the target
-                rpSBML._checklibSBML(target_unitDef.setId(source_unitDef.getId()),
+                rpSBML.checklibSBML(target_unitDef.setId(source_unitDef.getId()),
                     'setting target unit definition ID')
-                rpSBML._checklibSBML(target_unitDef.setAnnotation(source_unitDef.getAnnotation()),
+                rpSBML.checklibSBML(target_unitDef.setAnnotation(source_unitDef.getAnnotation()),
                     'setting target unit definition Annotation')
                 for source_unit in source_unitDef.getListOfUnits():
                     #copy unit info to the target unitDef
                     target_unit = target_unitDef.createUnit()
-                    rpSBML._checklibSBML(target_unit, 'creating target unit')
-                    rpSBML._checklibSBML(target_unit.setKind(source_unit.getKind()),
+                    rpSBML.checklibSBML(target_unit, 'creating target unit')
+                    rpSBML.checklibSBML(target_unit.setKind(source_unit.getKind()),
                         'setting target unit kind')
-                    rpSBML._checklibSBML(target_unit.setExponent(source_unit.getExponent()),
+                    rpSBML.checklibSBML(target_unit.setExponent(source_unit.getExponent()),
                         'setting target unit exponent')
-                    rpSBML._checklibSBML(target_unit.setScale(source_unit.getScale()),
+                    rpSBML.checklibSBML(target_unit.setScale(source_unit.getScale()),
                         'setting target unit scale')
-                    rpSBML._checklibSBML(target_unit.setMultiplier(source_unit.getMultiplier()),
+                    rpSBML.checklibSBML(target_unit.setMultiplier(source_unit.getMultiplier()),
                         'setting target unit multiplier')
                 target_unitDefID.append(source_unitDef.getId()) #add to the list to make sure its not added twice
         ################ COMPARTMENTS ###############
@@ -242,23 +244,23 @@ class rpSBML:
                 #if there is not MIRIAM match and the id's differ then add it
                 else:
                     target_compartment = target_rpsbml.getModel().createCompartment()
-                    rpSBML._checklibSBML(target_compartment, 'Creating target compartment')
-                    rpSBML._checklibSBML(target_compartment.setMetaId(source_compartment.getMetaId()),
+                    rpSBML.checklibSBML(target_compartment, 'Creating target compartment')
+                    rpSBML.checklibSBML(target_compartment.setMetaId(source_compartment.getMetaId()),
                             'setting target metaId')
                     #make sure that the ID is different
                     if source_compartment.getId()==target_compartment.getId():
-                        rpSBML._checklibSBML(target_compartment.setId(source_compartment.getId()+'_sourceModel'),
+                        rpSBML.checklibSBML(target_compartment.setId(source_compartment.getId()+'_sourceModel'),
                                 'setting target id')
                     else:
-                        rpSBML._checklibSBML(target_compartment.setId(source_compartment.getId()),
+                        rpSBML.checklibSBML(target_compartment.setId(source_compartment.getId()),
                                 'setting target id')
-                    rpSBML._checklibSBML(target_compartment.setName(source_compartment.getName()),
+                    rpSBML.checklibSBML(target_compartment.setName(source_compartment.getName()),
                             'setting target name')
-                    rpSBML._checklibSBML(target_compartment.setConstant(source_compartment.getConstant()),
+                    rpSBML.checklibSBML(target_compartment.setConstant(source_compartment.getConstant()),
                             'setting target constant')
-                    rpSBML._checklibSBML(target_compartment.setAnnotation(source_compartment.getAnnotation()),
+                    rpSBML.checklibSBML(target_compartment.setAnnotation(source_compartment.getAnnotation()),
                             'setting target annotation')
-                    rpSBML._checklibSBML(target_compartment.setSBOTerm(source_compartment.getSBOTerm()),
+                    rpSBML.checklibSBML(target_compartment.setSBOTerm(source_compartment.getSBOTerm()),
                             'setting target annotation')
                     comp_source_target[target_compartment.getId()] = target_compartment.getId()
         # logging.debug('comp_source_target: '+str(comp_source_target))
@@ -268,15 +270,15 @@ class rpSBML:
         for source_parameter in source_rpsbml.getModel().getListOfParameters():
             if source_parameter.getId() not in targetParametersID:
                 target_parameter = target_rpsbml.getModel().createParameter()
-                rpSBML._checklibSBML(target_parameter, 'creating target parameter')
-                rpSBML._checklibSBML(target_parameter.setId(source_parameter.getId()), 'setting target parameter ID')
-                rpSBML._checklibSBML(target_parameter.setSBOTerm(source_parameter.getSBOTerm()),
+                rpSBML.checklibSBML(target_parameter, 'creating target parameter')
+                rpSBML.checklibSBML(target_parameter.setId(source_parameter.getId()), 'setting target parameter ID')
+                rpSBML.checklibSBML(target_parameter.setSBOTerm(source_parameter.getSBOTerm()),
                     'setting target parameter SBO')
-                rpSBML._checklibSBML(target_parameter.setUnits(source_parameter.getUnits()),
+                rpSBML.checklibSBML(target_parameter.setUnits(source_parameter.getUnits()),
                     'setting target parameter Units')
-                rpSBML._checklibSBML(target_parameter.setValue(source_parameter.getValue()),
+                rpSBML.checklibSBML(target_parameter.setValue(source_parameter.getValue()),
                     'setting target parameter Value')
-                rpSBML._checklibSBML(target_parameter.setConstant(source_parameter.getConstant()),
+                rpSBML.checklibSBML(target_parameter.setConstant(source_parameter.getConstant()),
                     'setting target parameter ID')
         ################ FBC GENE PRODUCTS ########################
         #WARNING: here we compare by ID
@@ -284,14 +286,14 @@ class rpSBML:
         for source_geneProduct in source_fbc.getListOfGeneProducts():
             if not source_geneProduct.getId() in targetGenProductID:
                 target_geneProduct = target_fbc.createGeneProduct()
-                rpSBML._checklibSBML(target_geneProduct, 'creating target gene product')
-                rpSBML._checklibSBML(target_geneProduct.setId(source_geneProduct.getId()),
+                rpSBML.checklibSBML(target_geneProduct, 'creating target gene product')
+                rpSBML.checklibSBML(target_geneProduct.setId(source_geneProduct.getId()),
                     'setting target gene product id')
-                rpSBML._checklibSBML(target_geneProduct.setLabel(source_geneProduct.getLabel()),
+                rpSBML.checklibSBML(target_geneProduct.setLabel(source_geneProduct.getLabel()),
                     'setting target gene product label')
-                rpSBML._checklibSBML(target_geneProduct.setName(source_geneProduct.getName()),
+                rpSBML.checklibSBML(target_geneProduct.setName(source_geneProduct.getName()),
                     'setting target gene product name')
-                rpSBML._checklibSBML(target_geneProduct.setMetaId(source_geneProduct.getMetaId()),
+                rpSBML.checklibSBML(target_geneProduct.setMetaId(source_geneProduct.getMetaId()),
                     'setting target gene product meta_id')
         ############### FBC OBJECTIVES ############
         #WARNING: here we compare by ID
@@ -301,23 +303,23 @@ class rpSBML:
         for source_objective in source_fbc.getListOfObjectives():
             if not source_objective.getId() in targetObjectiveID:
                 target_objective = target_fbc.createObjective()
-                rpSBML._checklibSBML(target_objective, 'creating target objective')
-                rpSBML._checklibSBML(target_objective.setId(source_objective.getId()), 'setting target objective')
-                rpSBML._checklibSBML(target_objective.setName(source_objective.getName()), 'setting target objective')
-                rpSBML._checklibSBML(target_objective.setType(source_objective.getType()),
+                rpSBML.checklibSBML(target_objective, 'creating target objective')
+                rpSBML.checklibSBML(target_objective.setId(source_objective.getId()), 'setting target objective')
+                rpSBML.checklibSBML(target_objective.setName(source_objective.getName()), 'setting target objective')
+                rpSBML.checklibSBML(target_objective.setType(source_objective.getType()),
                         'setting target objective type')
                 for source_fluxObjective in source_objective.getListOfFluxObjectives():
                     target_fluxObjective = target_objective.createFluxObjective()
-                    rpSBML._checklibSBML(target_fluxObjective, 'creating target flux objective')
-                    rpSBML._checklibSBML(target_fluxObjective.setName(source_fluxObjective.getName()),
+                    rpSBML.checklibSBML(target_fluxObjective, 'creating target flux objective')
+                    rpSBML.checklibSBML(target_fluxObjective.setName(source_fluxObjective.getName()),
                         'setting target flux objective name')
-                    rpSBML._checklibSBML(target_fluxObjective.setCoefficient(source_fluxObjective.getCoefficient()),
+                    rpSBML.checklibSBML(target_fluxObjective.setCoefficient(source_fluxObjective.getCoefficient()),
                         'setting target flux objective coefficient')
-                    rpSBML._checklibSBML(target_fluxObjective.setReaction(source_fluxObjective.getReaction()),
+                    rpSBML.checklibSBML(target_fluxObjective.setReaction(source_fluxObjective.getReaction()),
                         'setting target flux objective reaction')
-                    rpSBML._checklibSBML(target_fluxObjective.setAnnotation(source_fluxObjective.getAnnotation()),
+                    rpSBML.checklibSBML(target_fluxObjective.setAnnotation(source_fluxObjective.getAnnotation()),
                         'setting target flux obj annotation from source flux obj')
-                rpSBML._checklibSBML(target_objective.setAnnotation(source_objective.getAnnotation()),
+                rpSBML.checklibSBML(target_objective.setAnnotation(source_objective.getAnnotation()),
                         'setting target obj annotation from source obj')
         # logging.debug('targetObjectiveID: '+str(targetObjectiveID))
         # logging.debug('sourceObjectiveID: '+str(sourceObjectiveID))
@@ -341,9 +343,9 @@ class rpSBML:
                 #TODO: loop throught the annotations and replace the non-overlapping information
                 target_member = target_rpsbml.getModel().getSpecies(list_species[0])
                 source_member = source_rpsbml.getModel().getSpecies(source_species)
-                rpSBML._checklibSBML(target_member, 'Retraiving the target species: '+str(list_species[0]))
-                rpSBML._checklibSBML(source_member, 'Retreiving the source species: '+str(source_species))
-                rpSBML._checklibSBML(target_member.setAnnotation(source_member.getAnnotation()), 'Replacing the annotations')
+                rpSBML.checklibSBML(target_member, 'Retraiving the target species: '+str(list_species[0]))
+                rpSBML.checklibSBML(source_member, 'Retreiving the source species: '+str(source_species))
+                rpSBML.checklibSBML(target_member.setAnnotation(source_member.getAnnotation()), 'Replacing the annotations')
             #if no match then add it to the target model
             else:
                 # logging.debug('Creating source species '+str(source_species)+' in target rpsbml')
@@ -351,10 +353,10 @@ class rpSBML:
                 if not source_species:
                     logging.error('Cannot retreive model species: '+str(source_species))
                 else:
-                    rpSBML._checklibSBML(source_species, 'fetching source species')
+                    rpSBML.checklibSBML(source_species, 'fetching source species')
                     targetModel_species = target_rpsbml.getModel().createSpecies()
-                    rpSBML._checklibSBML(targetModel_species, 'creating species')
-                    rpSBML._checklibSBML(targetModel_species.setMetaId(source_species.getMetaId()),
+                    rpSBML.checklibSBML(targetModel_species, 'creating species')
+                    rpSBML.checklibSBML(targetModel_species.setMetaId(source_species.getMetaId()),
                             'setting target metaId')
                     ## need to check if the id of the source species does not already exist in the target model
                     if source_species.getId() in target_species_ids:
@@ -364,25 +366,25 @@ class rpSBML:
                         species_source_target[source_species.getId()][source_rpsbml.getModel().id+'__'+str(source_species.getId())] = 1.0
                     else:
                         target_species_id = source_species.getId()
-                    rpSBML._checklibSBML(targetModel_species.setId(target_species_id),
+                    rpSBML.checklibSBML(targetModel_species.setId(target_species_id),
                             'setting target id')
-                    rpSBML._checklibSBML(targetModel_species.setCompartment(comp_source_target[source_species.getCompartment()]),
+                    rpSBML.checklibSBML(targetModel_species.setCompartment(comp_source_target[source_species.getCompartment()]),
                             'setting target compartment')
-                    rpSBML._checklibSBML(targetModel_species.setInitialConcentration(
+                    rpSBML.checklibSBML(targetModel_species.setInitialConcentration(
                         source_species.getInitialConcentration()),
                             'setting target initial concentration')
-                    rpSBML._checklibSBML(targetModel_species.setBoundaryCondition(
+                    rpSBML.checklibSBML(targetModel_species.setBoundaryCondition(
                         source_species.getBoundaryCondition()),
                             'setting target boundary concentration')
-                    rpSBML._checklibSBML(targetModel_species.setHasOnlySubstanceUnits(
+                    rpSBML.checklibSBML(targetModel_species.setHasOnlySubstanceUnits(
                         source_species.getHasOnlySubstanceUnits()),
                             'setting target has only substance units')
-                    rpSBML._checklibSBML(targetModel_species.setBoundaryCondition(
+                    rpSBML.checklibSBML(targetModel_species.setBoundaryCondition(
                         source_species.getBoundaryCondition()),
                             'setting target boundary condition')
-                    rpSBML._checklibSBML(targetModel_species.setConstant(source_species.getConstant()),
+                    rpSBML.checklibSBML(targetModel_species.setConstant(source_species.getConstant()),
                         'setting target constant')
-                    rpSBML._checklibSBML(targetModel_species.setAnnotation(source_species.getAnnotation()),
+                    rpSBML.checklibSBML(targetModel_species.setAnnotation(source_species.getAnnotation()),
                         'setting target annotation')
         ################ REACTIONS ###################
         # TODO; consider the case where two reactions have the same ID's but are not the same reactions
@@ -399,99 +401,99 @@ class rpSBML:
                     break
             if not is_found:
                 # logging.debug('Cannot find source reaction: '+str(source_reaction.getId()))
-                rpSBML._checklibSBML(source_reaction, 'fetching source reaction')
+                rpSBML.checklibSBML(source_reaction, 'fetching source reaction')
                 target_reaction = target_rpsbml.getModel().createReaction()
-                rpSBML._checklibSBML(target_reaction, 'create reaction')
+                rpSBML.checklibSBML(target_reaction, 'create reaction')
                 target_fbc = target_reaction.getPlugin('fbc')
-                rpSBML._checklibSBML(target_fbc, 'fetching target FBC package')
+                rpSBML.checklibSBML(target_fbc, 'fetching target FBC package')
                 source_fbc = source_reaction.getPlugin('fbc')
-                rpSBML._checklibSBML(source_fbc, 'fetching source FBC package')
+                rpSBML.checklibSBML(source_fbc, 'fetching source FBC package')
                 source_upperFluxBound = source_fbc.getUpperFluxBound()
-                rpSBML._checklibSBML(source_upperFluxBound, 'fetching upper flux bound')
-                rpSBML._checklibSBML(target_fbc.setUpperFluxBound(source_upperFluxBound),
+                rpSBML.checklibSBML(source_upperFluxBound, 'fetching upper flux bound')
+                rpSBML.checklibSBML(target_fbc.setUpperFluxBound(source_upperFluxBound),
                         'setting upper flux bound')
                 source_lowerFluxBound = source_fbc.getLowerFluxBound()
-                rpSBML._checklibSBML(source_lowerFluxBound, 'fetching lower flux bound')
-                rpSBML._checklibSBML(target_fbc.setLowerFluxBound(source_lowerFluxBound),
+                rpSBML.checklibSBML(source_lowerFluxBound, 'fetching lower flux bound')
+                rpSBML.checklibSBML(target_fbc.setLowerFluxBound(source_lowerFluxBound),
                         'setting lower flux bound')
-                rpSBML._checklibSBML(target_reaction.setId(source_reaction.getId()), 'set reaction id')
-                rpSBML._checklibSBML(target_reaction.setName(source_reaction.getName()), 'set name')
-                rpSBML._checklibSBML(target_reaction.setSBOTerm(source_reaction.getSBOTerm()),
+                rpSBML.checklibSBML(target_reaction.setId(source_reaction.getId()), 'set reaction id')
+                rpSBML.checklibSBML(target_reaction.setName(source_reaction.getName()), 'set name')
+                rpSBML.checklibSBML(target_reaction.setSBOTerm(source_reaction.getSBOTerm()),
                         'setting the reaction system biology ontology (SBO)') # set as process
                 # TODO: consider having the two parameters as input to the function
-                rpSBML._checklibSBML(target_reaction.setReversible(source_reaction.getReversible()),
+                rpSBML.checklibSBML(target_reaction.setReversible(source_reaction.getReversible()),
                         'set reaction reversibility flag')
-                rpSBML._checklibSBML(target_reaction.setFast(source_reaction.getFast()),
+                rpSBML.checklibSBML(target_reaction.setFast(source_reaction.getFast()),
                         'set reaction "fast" attribute')
-                rpSBML._checklibSBML(target_reaction.setMetaId(source_reaction.getMetaId()), 'setting species meta_id')
-                rpSBML._checklibSBML(target_reaction.setAnnotation(source_reaction.getAnnotation()),
+                rpSBML.checklibSBML(target_reaction.setMetaId(source_reaction.getMetaId()), 'setting species meta_id')
+                rpSBML.checklibSBML(target_reaction.setAnnotation(source_reaction.getAnnotation()),
                         'setting annotation for source reaction')
                 # Reactants
                 # logging.debug('Setting reactants')
                 for source_reaction_reactantID in [i.species for i in source_reaction.getListOfReactants()]:
                     # logging.debug('\tAdding '+str(source_reaction_reactantID))
                     target_reactant = target_reaction.createReactant()
-                    rpSBML._checklibSBML(target_reactant, 'create target reactant')
+                    rpSBML.checklibSBML(target_reactant, 'create target reactant')
                     if source_reaction_reactantID in species_source_target:
                         if not species_source_target[source_reaction_reactantID]=={}:
                             if len(species_source_target[source_reaction_reactantID])>1:
                                 logging.warning('Multiple matches for '+str(source_reaction_reactantID)+': '+str(species_source_target[source_reaction_reactantID]))
                                 logging.warning('Taking one the first one arbitrarely: '+str([i for i in species_source_target[source_reaction_reactantID]][0]))
                             # WARNING: taking the first one arbitrarely
-                            rpSBML._checklibSBML(target_reactant.setSpecies(
+                            rpSBML.checklibSBML(target_reactant.setSpecies(
                                 [i for i in species_source_target[source_reaction_reactantID]][0]), 'assign reactant species')
                         else:
-                            rpSBML._checklibSBML(target_reactant.setSpecies(source_reaction_reactantID),
+                            rpSBML.checklibSBML(target_reactant.setSpecies(source_reaction_reactantID),
                                 'assign reactant species')
                     else:
-                        rpSBML._checklibSBML(target_reactant.setSpecies(source_reaction_reactantID),
+                        rpSBML.checklibSBML(target_reactant.setSpecies(source_reaction_reactantID),
                             'assign reactant species')
                     source_reactant = source_reaction.getReactant(source_reaction_reactantID)
-                    rpSBML._checklibSBML(source_reactant, 'fetch source reactant')
-                    rpSBML._checklibSBML(target_reactant.setConstant(source_reactant.getConstant()),
+                    rpSBML.checklibSBML(source_reactant, 'fetch source reactant')
+                    rpSBML.checklibSBML(target_reactant.setConstant(source_reactant.getConstant()),
                             'set "constant" on species '+str(source_reactant.getConstant()))
-                    rpSBML._checklibSBML(target_reactant.setStoichiometry(source_reactant.getStoichiometry()),
+                    rpSBML.checklibSBML(target_reactant.setStoichiometry(source_reactant.getStoichiometry()),
                             'set stoichiometry ('+str(source_reactant.getStoichiometry)+')')
                 # Products
                 # logging.debug('Setting products')
                 for source_reaction_productID in [i.species for i in source_reaction.getListOfProducts()]:
                     # logging.debug('\tAdding '+str(source_reaction_productID))
                     target_product = target_reaction.createProduct()
-                    rpSBML._checklibSBML(target_product, 'create target reactant')
+                    rpSBML.checklibSBML(target_product, 'create target reactant')
                     if source_reaction_productID in species_source_target:
                         if not species_source_target[source_reaction_productID]=={}:
                             if len(species_source_target[source_reaction_reactantID])>1:
                                 logging.warning('Multiple matches for '+str(source_reaction_productID)+': '+str(species_source_target[source_reaction_productID]))
                                 logging.warning('Taking one arbitrarely')
                             # WARNING: taking the first one arbitrarely
-                            rpSBML._checklibSBML(target_product.setSpecies(
+                            rpSBML.checklibSBML(target_product.setSpecies(
                                 [i for i in species_source_target[source_reaction_productID]][0]), 'assign reactant product')
                         else:
-                            rpSBML._checklibSBML(target_product.setSpecies(source_reaction_productID),
+                            rpSBML.checklibSBML(target_product.setSpecies(source_reaction_productID),
                                 'assign reactant product')
                     else:
-                        rpSBML._checklibSBML(target_product.setSpecies(source_reaction_productID),
+                        rpSBML.checklibSBML(target_product.setSpecies(source_reaction_productID),
                             'assign reactant product')
                     source_product = source_reaction.getProduct(source_reaction_productID)
-                    rpSBML._checklibSBML(source_product, 'fetch source reactant')
-                    rpSBML._checklibSBML(target_product.setConstant(source_product.getConstant()),
+                    rpSBML.checklibSBML(source_product, 'fetch source reactant')
+                    rpSBML.checklibSBML(target_product.setConstant(source_product.getConstant()),
                             'set "constant" on product '+str(source_product.getConstant()))
-                    rpSBML._checklibSBML(target_product.setStoichiometry(source_product.getStoichiometry()),
+                    rpSBML.checklibSBML(target_product.setStoichiometry(source_product.getStoichiometry()),
                             'set stoichiometry ('+str(source_product.getStoichiometry)+')')
         #### GROUPS #####
         # TODO loop through the groups to add them
         if not target_rpsbml.getModel().isPackageEnabled('groups'):
-            rpSBML._checklibSBML(target_rpsbml.getModel().enablePackage(
+            rpSBML.checklibSBML(target_rpsbml.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/groups/version1',
                 'groups',
                 True),
                     'Enabling the GROUPS package')
         #!!!! must be set to false for no apparent reason
-        rpSBML._checklibSBML(source_rpsbml.document.setPackageRequired('groups', False), 'enabling groups package')
+        rpSBML.checklibSBML(source_rpsbml.document.setPackageRequired('groups', False), 'enabling groups package')
         source_groups = source_rpsbml.getModel().getPlugin('groups')
-        rpSBML._checklibSBML(source_groups, 'fetching the source model groups')
+        rpSBML.checklibSBML(source_groups, 'fetching the source model groups')
         target_groups = target_rpsbml.getModel().getPlugin('groups')
-        rpSBML._checklibSBML(target_groups, 'fetching the target model groups')
+        rpSBML.checklibSBML(target_groups, 'fetching the target model groups')
         # # logging.debug('species_source_target: '+str(species_source_target))
         # # logging.debug('reactions_source_target: '+str(reactions_source_target))
         source_groups_ids = [i.id for i in source_groups.getListOfGroups()]
@@ -515,10 +517,10 @@ class rpSBML:
                             #logging.warning('Source species '+str(member.getIdRef())+' has been created in the target model')
                         elif len(list_species)>1:
                             logging.warning('There are multiple matches to the species '+str(member.getIdRef())+'... taking the first one: '+str(list_species))
-                        rpSBML._checklibSBML(member.setIdRef(list_species[0]), 'Setting name to the groups member')
+                        rpSBML.checklibSBML(member.setIdRef(list_species[0]), 'Setting name to the groups member')
             #create and add the groups if a source group does not exist in the target
             if not source_group.id in target_groups_ids:
-                rpSBML._checklibSBML(target_groups.addGroup(source_group),
+                rpSBML.checklibSBML(target_groups.addGroup(source_group),
                     'copy the source groups to the target groups')
             #if the group already exists in the target then need to add new members
             else:
@@ -527,8 +529,8 @@ class rpSBML:
                 for member in source_group.getListOfMembers():
                     if member.getIdRef() not in target_group_ids:
                         new_member = target_group.createMember()
-                        rpSBML._checklibSBML(new_member, 'Creating a new groups member')
-                        rpSBML._checklibSBML(new_member.setIdRef(member.getIdRef()), 'Setting name to the groups member')
+                        rpSBML.checklibSBML(new_member, 'Creating a new groups member')
+                        rpSBML.checklibSBML(new_member.setIdRef(member.getIdRef()), 'Setting name to the groups member')
         ###### TITLES #####
         target_rpsbml.getModel().setId(target_rpsbml.getModel().getId()+'__'+source_rpsbml.getModel().getId())
         target_rpsbml.getModel().setName(target_rpsbml.getModel().getName()+' merged with '+source_rpsbml.getModel().getId())
@@ -1247,7 +1249,7 @@ class rpSBML:
 
 
     @staticmethod
-    def _checklibSBML(value, message):
+    def checklibSBML(value, message):
         """Private function that checks the libSBML calls.
 
         Check that the libSBML python calls do not return error INT and if so, display the error. Taken from: http://sbml.org/Software/libSBML/docs/python-api/create_simple_model_8py-example.html
@@ -1264,20 +1266,53 @@ class rpSBML:
         :rtype: None
         """
         if value is None:
-            logging.error('LibSBML returned a null value trying to ' + message + '.')
-            raise AttributeError
+           raise SystemExit('LibSBML returned a null value trying to ' + message + '.')
         elif type(value) is int:
-            if value == libsbml.LIBSBML_OPERATION_SUCCESS:
-                return
-            else:
-                err_msg = 'Error encountered trying to ' + message + '.' \
-                        + 'LibSBML returned error code ' + str(value) + ': "' \
-                        + libsbml.OperationReturnValue_toString(value).strip() + '"'
-                logging.error(err_msg)
-                raise AttributeError
+           if value == libsbml.LIBSBML_OPERATION_SUCCESS:
+               return
+           else:
+               err_msg = 'Error encountered trying to ' + message + '.' \
+                         + 'LibSBML returned error code ' + str(value) + ': "' \
+                         + libsbml.OperationReturnValue_toString(value).strip() + '"'
+               raise SystemExit(err_msg)
         else:
-            # logging.info(message)
-            return None
+         return
+        # if value is None:
+        #     logging.error('LibSBML returned a null value trying to ' + message + '.')
+        #     raise AttributeError
+        # elif type(value) is int:
+        #     if value == libsbml.LIBSBML_OPERATION_SUCCESS:
+        #         return
+        #     else:
+        #         err_msg = 'Error encountered trying to ' + message + '.' \
+        #                 + 'LibSBML returned error code ' + str(value) + ': "' \
+        #                 + libsbml.OperationReturnValue_toString(value).strip() + '"'
+        #         logging.error(err_msg)
+        #         raise AttributeError
+        # else:
+        #     # logging.info(message)
+        #     return None
+
+    def convertToCobra(self):
+        """Convert the rpSBML object to cobra object
+
+        :return: Success or failure of the function
+        :rtype: bool
+        """
+        try:
+            with tempfile.TemporaryDirectory() as tmpOutputFolder:
+                self.writeSBML(tmpOutputFolder)
+                #logging.info(glob.glob(tmpOutputFolder+'/*'))
+                #logging.info(cobra.io.validate_sbml_model(glob.glob(tmpOutputFolder+'/*')[0]))
+                cobraModel = cobra.io.read_sbml_model(glob.glob(tmpOutputFolder+'/*')[0], use_fbc_package=True)
+            #self.cobraModel = cobra.io.read_sbml_model(self.rpsbml.document.toXMLNode().toXMLString(), use_fbc_package=True)
+            #use CPLEX
+            # self.cobraModel.solver = 'cplex'
+        except cobra.io.sbml.CobraSBMLError as e:
+            # self.logger.error(e)
+            # self.logger.error('Cannot convert the libSBML model to Cobra')
+            return False
+        return cobraModel
 
 
     def _nameToSbmlId(self, name):
@@ -1524,10 +1559,10 @@ class rpSBML:
             if annot_header == brsynth_annot.getChild(i).getName():
                 isfound_target = True
                 '''
-                self._checklibSBML(brsynth_annot.removeChild(brsynth_annot.getIndex(i)),
+                self.checklibSBML(brsynth_annot.removeChild(brsynth_annot.getIndex(i)),
                     'Removing annotation '+str(annot_header))
                 '''
-                self._checklibSBML(brsynth_annot.removeChild(i), 'Removing annotation '+str(annot_header))
+                self.checklibSBML(brsynth_annot.removeChild(i), 'Removing annotation '+str(annot_header))
                 isfound_source = False
                 source_brsynth_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth')
                 for y in range(source_brsynth_annot.getNumChildren()):
@@ -1537,7 +1572,7 @@ class rpSBML:
                         # logging.debug('Adding annotation to the brsynth annotation: '+str(source_brsynth_annot.getChild(y).toXMLString()))
                         towrite_annot = source_brsynth_annot.getChild(y)
                         # logging.debug(brsynth_annot.toXMLString())
-                        self._checklibSBML(brsynth_annot.addChild(towrite_annot), ' 1 - Adding annotation to the brsynth annotation')
+                        self.checklibSBML(brsynth_annot.addChild(towrite_annot), ' 1 - Adding annotation to the brsynth annotation')
                         # logging.debug(brsynth_annot.toXMLString())
                         break
                 if not isfound_source:
@@ -1553,18 +1588,18 @@ class rpSBML:
                     # logging.debug('Adding annotation to the brsynth annotation: '+str(source_brsynth_annot.getChild(y).toXMLString()))
                     towrite_annot = source_brsynth_annot.getChild(y)
                     # logging.debug(brsynth_annot.toXMLString())
-                    self._checklibSBML(brsynth_annot.addChild(towrite_annot), '2 - Adding annotation to the brsynth annotation')
+                    self.checklibSBML(brsynth_annot.addChild(towrite_annot), '2 - Adding annotation to the brsynth annotation')
                     # logging.debug(brsynth_annot.toXMLString())
                     break
             if not isfound_source:
                 logging.error('Cannot find '+str(annot_header)+' in source annotation')
             # toWrite_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild(annot_header)
-            # self._checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
+            # self.checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
                 return False
         '''
         if brsynth_annot.getChild(annot_header).toXMLString()=='':
             toWrite_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild(annot_header)
-            self._checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
+            self.checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
         else:
             # try:
             # logging.debug('==============================')
@@ -1572,17 +1607,17 @@ class rpSBML:
             for i in range(brsynth_annot.getNumChildren()):
                 if annot_header == brsynth_annot.getChild(i).getName():
                     # logging.debug('Found the same name to remove: '+str(annot_header))
-                    self._checklibSBML(brsynth_annot.removeChild(brsynth_annot.getIndex(i)),
+                    self.checklibSBML(brsynth_annot.removeChild(brsynth_annot.getIndex(i)),
                         'Removing annotation '+str(annot_header))
                     toWrite_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild(annot_header)
-                    self._checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
+                    self.checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
                     found_child = True
                     break
             # cause by a bbug with string lookup
             if not found_child:
                 logging.warning('Bug with lookup adding it now: '+str(annot_header))
                 toWrite_annot = annot_obj.getChild('RDF').getChild('BRSynth').getChild('brsynth').getChild(annot_header)
-                self._checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
+                self.checklibSBML(brsynth_annot.addChild(toWrite_annot), 'Adding annotation to the brsynth annotation')
             # except OverflowError:
             #    logging.warning('TODO: Overflow error that must be dealt with')
             #    logging.warning(brsynth_annot.getChild(annot_header).toXMLString())
@@ -1705,8 +1740,8 @@ class rpSBML:
                 sbase_obj.unsetAnnotation()
                 sbase_obj.setAnnotation(miriam_annot)
             else:
-                rpSBML._checklibSBML(ori_miriam_annot.getChild('RDF').getChild('Description').getChild('is').removeChild(0), 'Removing annotation "is"')
-                rpSBML._checklibSBML(ori_miriam_annot.getChild('RDF').getChild('Description').getChild('is').addChild(miriam_annot), 'Adding annotation to the brsynth annotation')
+                rpSBML.checklibSBML(ori_miriam_annot.getChild('RDF').getChild('Description').getChild('is').removeChild(0), 'Removing annotation "is"')
+                rpSBML.checklibSBML(ori_miriam_annot.getChild('RDF').getChild('Description').getChild('is').addChild(miriam_annot), 'Adding annotation to the brsynth annotation')
         return True
 
 
@@ -1769,7 +1804,7 @@ class rpSBML:
             logging.error('Invalid input file')
             raise FileNotFoundError
         self.document = libsbml.readSBMLFromFile(inFile)
-        rpSBML._checklibSBML(self.getDocument(), 'reading input file')
+        rpSBML.checklibSBML(self.getDocument(), 'reading input file')
         errors = self.getDocument().getNumErrors()
         # display the errors in the log accordning to the severity
         for err in [self.getDocument().getError(i) for i in range(self.getDocument().getNumErrors())]:
@@ -1784,19 +1819,19 @@ class rpSBML:
             raise FileNotFoundError
         # enabling the extra packages if they do not exists when reading a model
         if not self.getModel().isPackageEnabled('groups'):
-            rpSBML._checklibSBML(self.getModel().enablePackage(
+            rpSBML.checklibSBML(self.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/groups/version1',
                 'groups',
                 True),
                     'Enabling the GROUPS package')
-            rpSBML._checklibSBML(self.getDocument().setPackageRequired('groups', False), 'enabling groups package')
+            rpSBML.checklibSBML(self.getDocument().setPackageRequired('groups', False), 'enabling groups package')
         if not self.getModel().isPackageEnabled('fbc'):
-            rpSBML._checklibSBML(self.getModel().enablePackage(
+            rpSBML.checklibSBML(self.getModel().enablePackage(
                 'http://www.sbml.org/sbml/level3/version1/fbc/version2',
                 'fbc',
                 True),
                     'Enabling the FBC package')
-            rpSBML._checklibSBML(self.getDocument().setPackageRequired('fbc', False), 'enabling FBC package')
+            rpSBML.checklibSBML(self.getDocument().setPackageRequired('fbc', False), 'enabling FBC package')
 
 
 
@@ -1856,7 +1891,7 @@ class rpSBML:
         :return: Objective ID
         """
         fbc_plugin = self.getModel().getPlugin('fbc')
-        rpSBML._checklibSBML(fbc_plugin, 'Getting FBC package')
+        rpSBML.checklibSBML(fbc_plugin, 'Getting FBC package')
         if not objective_id:
             objective_id = 'obj_'+'_'.join(reactions)
             logging.info('Setting objective as '+str(objective_id))
@@ -1896,7 +1931,7 @@ class rpSBML:
         """
         groups = self.getModel().getPlugin('groups')
         rp_pathway = groups.getGroup(pathway_id)
-        rpSBML._checklibSBML(rp_pathway, 'retreiving groups rp_pathway')
+        rpSBML.checklibSBML(rp_pathway, 'retreiving groups rp_pathway')
         toRet = []
         for member in rp_pathway.getListOfMembers():
             toRet.append(member.getIdRef())
@@ -2503,16 +2538,16 @@ class rpSBML:
             logging.error('Cannot find the reaction: '+str(reaction_id))
             return False
         reac_fbc = reaction.getPlugin('fbc')
-        rpSBML._checklibSBML(reac_fbc, 'extending reaction for FBC')
+        rpSBML.checklibSBML(reac_fbc, 'extending reaction for FBC')
         ########## upper bound #############
         old_upper_value = self.getModel().getParameter(reac_fbc.getUpperFluxBound()).value
         upper_param = self.createReturnFluxParameter(upper_bound, unit, is_constant)
-        rpSBML._checklibSBML(reac_fbc.setUpperFluxBound(upper_param.getId()),
+        rpSBML.checklibSBML(reac_fbc.setUpperFluxBound(upper_param.getId()),
             'setting '+str(reaction_id)+' upper flux bound')
         ######### lower bound #############
         old_lower_value = self.getModel().getParameter(reac_fbc.getLowerFluxBound()).value
         lower_param = self.createReturnFluxParameter(lower_bound, unit, is_constant)
-        rpSBML._checklibSBML(reac_fbc.setLowerFluxBound(lower_param.getId()),
+        rpSBML.checklibSBML(reac_fbc.setLowerFluxBound(lower_param.getId()),
             'setting '+str(reaction_id)+' lower flux bound')
         return old_upper_value, old_lower_value
 
@@ -2596,29 +2631,29 @@ class rpSBML:
         """
         ## sbmldoc
         self.sbmlns = libsbml.SBMLNamespaces(3,1)
-        rpSBML._checklibSBML(self.sbmlns, 'generating model namespace')
-        rpSBML._checklibSBML(self.sbmlns.addPkgNamespace('groups',1), 'Add groups package')
-        rpSBML._checklibSBML(self.sbmlns.addPkgNamespace('fbc',2), 'Add FBC package')
+        rpSBML.checklibSBML(self.sbmlns, 'generating model namespace')
+        rpSBML.checklibSBML(self.sbmlns.addPkgNamespace('groups',1), 'Add groups package')
+        rpSBML.checklibSBML(self.sbmlns.addPkgNamespace('fbc',2), 'Add FBC package')
         # sbmlns = libsbml.SBMLNamespaces(3,1,'groups',1)
         self.document = libsbml.SBMLDocument(self.sbmlns)
-        rpSBML._checklibSBML(self.document, 'generating model doc')
+        rpSBML.checklibSBML(self.document, 'generating model doc')
         #!!!! must be set to false for no apparent reason
-        rpSBML._checklibSBML(self.document.setPackageRequired('fbc', False), 'enabling FBC package')
+        rpSBML.checklibSBML(self.document.setPackageRequired('fbc', False), 'enabling FBC package')
         #!!!! must be set to false for no apparent reason
-        rpSBML._checklibSBML(self.document.setPackageRequired('groups', False), 'enabling groups package')
+        rpSBML.checklibSBML(self.document.setPackageRequired('groups', False), 'enabling groups package')
         ## sbml model
         self.document.createModel()
-        rpSBML._checklibSBML(self.getModel(), 'generating the model')
-        rpSBML._checklibSBML(self.getModel().setId(model_id), 'setting the model ID')
+        rpSBML.checklibSBML(self.getModel(), 'generating the model')
+        rpSBML.checklibSBML(self.getModel().setId(model_id), 'setting the model ID')
         model_fbc = self.getModel().getPlugin('fbc')
         model_fbc.setStrict(True)
         if not meta_id:
             meta_id = self._genMetaID(model_id)
-        rpSBML._checklibSBML(self.getModel().setMetaId(meta_id), 'setting model meta_id')
-        rpSBML._checklibSBML(self.getModel().setName(name), 'setting model name')
-        rpSBML._checklibSBML(self.getModel().setTimeUnits('second'), 'setting model time unit')
-        rpSBML._checklibSBML(self.getModel().setExtentUnits('mole'), 'setting model compartment unit')
-        rpSBML._checklibSBML(self.getModel().setSubstanceUnits('mole'), 'setting model substance unit')
+        rpSBML.checklibSBML(self.getModel().setMetaId(meta_id), 'setting model meta_id')
+        rpSBML.checklibSBML(self.getModel().setName(name), 'setting model name')
+        rpSBML.checklibSBML(self.getModel().setTimeUnits('second'), 'setting model time unit')
+        rpSBML.checklibSBML(self.getModel().setExtentUnits('mole'), 'setting model compartment unit')
+        rpSBML.checklibSBML(self.getModel().setSubstanceUnits('mole'), 'setting model substance unit')
 
 
     #TODO: set the compName as None by default. To do that you need to regenerate the compXref to
@@ -2643,16 +2678,16 @@ class rpSBML:
         :return: None
         """
         comp = self.getModel().createCompartment()
-        rpSBML._checklibSBML(comp, 'create compartment')
-        rpSBML._checklibSBML(comp.setId(compId), 'set compartment id')
+        rpSBML.checklibSBML(comp, 'create compartment')
+        rpSBML.checklibSBML(comp.setId(compId), 'set compartment id')
         if compName:
-            rpSBML._checklibSBML(comp.setName(compName), 'set the name for the cytoplam')
-        rpSBML._checklibSBML(comp.setConstant(True), 'set compartment "constant"')
-        rpSBML._checklibSBML(comp.setSize(size), 'set compartment "size"')
-        rpSBML._checklibSBML(comp.setSBOTerm(290), 'set SBO term for the cytoplasm compartment')
+            rpSBML.checklibSBML(comp.setName(compName), 'set the name for the cytoplam')
+        rpSBML.checklibSBML(comp.setConstant(True), 'set compartment "constant"')
+        rpSBML.checklibSBML(comp.setSize(size), 'set compartment "size"')
+        rpSBML.checklibSBML(comp.setSBOTerm(290), 'set SBO term for the cytoplasm compartment')
         if not meta_id:
             meta_id = self._genMetaID(compId)
-        rpSBML._checklibSBML(comp.setMetaId(meta_id), 'set the meta_id for the compartment')
+        rpSBML.checklibSBML(comp.setMetaId(meta_id), 'set the meta_id for the compartment')
         ############################ MIRIAM ############################
         comp.setAnnotation(libsbml.XMLNode.convertStringToXMLNode(self._defaultMIRIAMAnnot(meta_id)))
         # print(libsbml.XMLNode.convertXMLNodeToString(comp.getAnnotation()))
@@ -2676,11 +2711,11 @@ class rpSBML:
         :return: Unit definition object created
         """
         unitDef = self.getModel().createUnitDefinition()
-        rpSBML._checklibSBML(unitDef, 'creating unit definition')
-        rpSBML._checklibSBML(unitDef.setId(unit_id), 'setting id')
+        rpSBML.checklibSBML(unitDef, 'creating unit definition')
+        rpSBML.checklibSBML(unitDef.setId(unit_id), 'setting id')
         if not meta_id:
             meta_id = self._genMetaID(unit_id)
-        rpSBML._checklibSBML(unitDef.setMetaId(meta_id), 'setting meta_id')
+        rpSBML.checklibSBML(unitDef.setMetaId(meta_id), 'setting meta_id')
         # self.unitDefinitions.append(unit_id)
         return unitDef
 
@@ -2704,11 +2739,11 @@ class rpSBML:
         :return: None
         """
         unit = unitDef.createUnit()
-        rpSBML._checklibSBML(unit, 'creating unit')
-        rpSBML._checklibSBML(unit.setKind(libsbmlunit), 'setting the kind of unit')
-        rpSBML._checklibSBML(unit.setExponent(exponent), 'setting the exponenent of the unit')
-        rpSBML._checklibSBML(unit.setScale(scale), 'setting the scale of the unit')
-        rpSBML._checklibSBML(unit.setMultiplier(multiplier), 'setting the multiplier of the unit')
+        rpSBML.checklibSBML(unit, 'creating unit')
+        rpSBML.checklibSBML(unit.setKind(libsbmlunit), 'setting the kind of unit')
+        rpSBML.checklibSBML(unit.setExponent(exponent), 'setting the exponenent of the unit')
+        rpSBML.checklibSBML(unit.setScale(scale), 'setting the scale of the unit')
+        rpSBML.checklibSBML(unit.setMultiplier(multiplier), 'setting the multiplier of the unit')
 
 
     def createReturnFluxParameter(self,
@@ -2748,15 +2783,15 @@ class rpSBML:
             return self.getModel().getParameter(param_id)
         else:
             newParam = self.getModel().createParameter()
-            rpSBML._checklibSBML(newParam, 'Creating a new parameter object')
-            rpSBML._checklibSBML(newParam.setConstant(is_constant), 'setting as constant')
-            rpSBML._checklibSBML(newParam.setId(param_id), 'setting ID')
-            rpSBML._checklibSBML(newParam.setValue(value), 'setting value')
-            rpSBML._checklibSBML(newParam.setUnits(unit), 'setting units')
-            rpSBML._checklibSBML(newParam.setSBOTerm(625), 'setting SBO term')
+            rpSBML.checklibSBML(newParam, 'Creating a new parameter object')
+            rpSBML.checklibSBML(newParam.setConstant(is_constant), 'setting as constant')
+            rpSBML.checklibSBML(newParam.setId(param_id), 'setting ID')
+            rpSBML.checklibSBML(newParam.setValue(value), 'setting value')
+            rpSBML.checklibSBML(newParam.setUnits(unit), 'setting units')
+            rpSBML.checklibSBML(newParam.setSBOTerm(625), 'setting SBO term')
             if not meta_id:
                 meta_id = self._genMetaID(parameter_id)
-            rpSBML._checklibSBML(newParam.setMetaId(meta_id), 'setting meta ID')
+            rpSBML.checklibSBML(newParam.setMetaId(meta_id), 'setting meta ID')
             # self.parameters.append(parameter_id)
             return newParam
 
@@ -2800,48 +2835,48 @@ class rpSBML:
         :return: None
         """
         reac = self.getModel().createReaction()
-        rpSBML._checklibSBML(reac, 'create reaction')
+        rpSBML.checklibSBML(reac, 'create reaction')
         ################ FBC ####################
         reac_fbc = reac.getPlugin('fbc')
-        rpSBML._checklibSBML(reac_fbc, 'extending reaction for FBC')
+        rpSBML.checklibSBML(reac_fbc, 'extending reaction for FBC')
         # bounds
         upper_bound = self.createReturnFluxParameter(fluxUpperBound)
         lower_bound = self.createReturnFluxParameter(fluxLowerBound)
-        rpSBML._checklibSBML(reac_fbc.setUpperFluxBound(upper_bound.getId()), 'setting '+str(reac_id)+' upper flux bound')
-        rpSBML._checklibSBML(reac_fbc.setLowerFluxBound(lower_bound.getId()), 'setting '+str(reac_id)+' lower flux bound')
+        rpSBML.checklibSBML(reac_fbc.setUpperFluxBound(upper_bound.getId()), 'setting '+str(reac_id)+' upper flux bound')
+        rpSBML.checklibSBML(reac_fbc.setLowerFluxBound(lower_bound.getId()), 'setting '+str(reac_id)+' lower flux bound')
         #########################################
         # reactions
-        rpSBML._checklibSBML(reac.setId(reac_id), 'set reaction id') # same convention as cobrapy
-        rpSBML._checklibSBML(reac.setSBOTerm(176), 'setting the system biology ontology (SBO)') # set as process
+        rpSBML.checklibSBML(reac.setId(reac_id), 'set reaction id') # same convention as cobrapy
+        rpSBML.checklibSBML(reac.setSBOTerm(176), 'setting the system biology ontology (SBO)') # set as process
         # TODO: consider having the two parameters as input to the function
-        rpSBML._checklibSBML(reac.setReversible(True), 'set reaction reversibility flag')
-        rpSBML._checklibSBML(reac.setFast(False), 'set reaction "fast" attribute')
+        rpSBML.checklibSBML(reac.setReversible(True), 'set reaction reversibility flag')
+        rpSBML.checklibSBML(reac.setFast(False), 'set reaction "fast" attribute')
         if not meta_id:
             meta_id = self._genMetaID(reac_id)
-        rpSBML._checklibSBML(reac.setMetaId(meta_id), 'setting species meta_id')
+        rpSBML.checklibSBML(reac.setMetaId(meta_id), 'setting species meta_id')
         # TODO: check that the species exist
         # reactants_dict
         for reactant in step['left']:
             spe = reac.createReactant()
-            rpSBML._checklibSBML(spe, 'create reactant')
+            rpSBML.checklibSBML(spe, 'create reactant')
             # use the same writing convention as CobraPy
-            rpSBML._checklibSBML(spe.setSpecies(str(reactant)+'__64__'+str(compartment_id)), 'assign reactant species')
+            rpSBML.checklibSBML(spe.setSpecies(str(reactant)+'__64__'+str(compartment_id)), 'assign reactant species')
             # TODO: check to see the consequences of heterologous parameters not being constant
-            rpSBML._checklibSBML(spe.setConstant(True), 'set "constant" on species '+str(reactant))
-            rpSBML._checklibSBML(spe.setStoichiometry(float(step['left'][reactant])),
+            rpSBML.checklibSBML(spe.setConstant(True), 'set "constant" on species '+str(reactant))
+            rpSBML.checklibSBML(spe.setStoichiometry(float(step['left'][reactant])),
                 'set stoichiometry ('+str(float(step['left'][reactant]))+')')
         # TODO: check that the species exist
         # products_dict
         for product in step['right']:
             pro = reac.createProduct()
-            rpSBML._checklibSBML(pro, 'create product')
-            rpSBML._checklibSBML(pro.setSpecies(str(product)+'__64__'+str(compartment_id)), 'assign product species')
+            rpSBML.checklibSBML(pro, 'create product')
+            rpSBML.checklibSBML(pro.setSpecies(str(product)+'__64__'+str(compartment_id)), 'assign product species')
             # TODO: check to see the consequences of heterologous parameters not being constant
-            rpSBML._checklibSBML(pro.setConstant(True), 'set "constant" on species '+str(product))
-            rpSBML._checklibSBML(pro.setStoichiometry(float(step['right'][product])),
+            rpSBML.checklibSBML(pro.setConstant(True), 'set "constant" on species '+str(product))
+            rpSBML.checklibSBML(pro.setStoichiometry(float(step['right'][product])),
                 'set the stoichiometry ('+str(float(step['right'][product]))+')')
         ############################ MIRIAM ############################
-        rpSBML._checklibSBML(reac.setAnnotation(self._defaultBothAnnot(meta_id)), 'creating annotation')
+        rpSBML.checklibSBML(reac.setAnnotation(self._defaultBothAnnot(meta_id)), 'creating annotation')
         self.addUpdateMIRIAM(reac, 'reaction', reacXref, meta_id)
         ###### BRSYNTH additional information ########
         if reaction_smiles:
@@ -2870,8 +2905,8 @@ class rpSBML:
                 logging.warning('The pathway_id '+str(pathway_id)+' does not exist in the model')
             else:
                 newM = hetero_group.createMember()
-                rpSBML._checklibSBML(newM, 'Creating a new groups member')
-                rpSBML._checklibSBML(newM.setIdRef(reac_id), 'Setting name to the groups member')
+                rpSBML.checklibSBML(newM, 'Creating a new groups member')
+                rpSBML.checklibSBML(newM.setIdRef(reac_id), 'Setting name to the groups member')
 
 
     def createSpecies(self,
@@ -2918,37 +2953,37 @@ class rpSBML:
         :return: None
         """
         spe = self.getModel().createSpecies()
-        rpSBML._checklibSBML(spe, 'create species')
+        rpSBML.checklibSBML(spe, 'create species')
         ##### FBC #####
         spe_fbc = spe.getPlugin('fbc')
-        rpSBML._checklibSBML(spe_fbc, 'creating this species as an instance of FBC')
+        rpSBML.checklibSBML(spe_fbc, 'creating this species as an instance of FBC')
         # spe_fbc.setCharge(charge) #### These are not required for FBA
         # spe_fbc.setChemicalFormula(chemForm) #### These are not required for FBA
         # if compartment_id:
-        rpSBML._checklibSBML(spe.setCompartment(compartment_id), 'set species spe compartment')
+        rpSBML.checklibSBML(spe.setCompartment(compartment_id), 'set species spe compartment')
         # else:
         #    # removing this could lead to errors with xref
-        #    rpSBML._checklibSBML(spe.setCompartment(self.compartment_id), 'set species spe compartment')
+        #    rpSBML.checklibSBML(spe.setCompartment(self.compartment_id), 'set species spe compartment')
         # ID same structure as cobrapy
         # TODO: determine if this is always the case or it will change
-        rpSBML._checklibSBML(spe.setHasOnlySubstanceUnits(False), 'set substance units')
-        rpSBML._checklibSBML(spe.setBoundaryCondition(False), 'set boundary conditions')
-        rpSBML._checklibSBML(spe.setConstant(False), 'set constant')
+        rpSBML.checklibSBML(spe.setHasOnlySubstanceUnits(False), 'set substance units')
+        rpSBML.checklibSBML(spe.setBoundaryCondition(False), 'set boundary conditions')
+        rpSBML.checklibSBML(spe.setConstant(False), 'set constant')
         # useless for FBA (usefull for ODE) but makes Copasi stop complaining
-        rpSBML._checklibSBML(spe.setInitialConcentration(1.0), 'set an initial concentration')
+        rpSBML.checklibSBML(spe.setInitialConcentration(1.0), 'set an initial concentration')
         # same writting convention as COBRApy
-        rpSBML._checklibSBML(spe.setId(str(species_id)+'__64__'+str(compartment_id)), 'set species id')
+        rpSBML.checklibSBML(spe.setId(str(species_id)+'__64__'+str(compartment_id)), 'set species id')
         if not meta_id:
             meta_id = self._genMetaID(species_id)
-        rpSBML._checklibSBML(spe.setMetaId(meta_id), 'setting reaction meta_id')
+        rpSBML.checklibSBML(spe.setMetaId(meta_id), 'setting reaction meta_id')
         if not species_name:
-            rpSBML._checklibSBML(spe.setName(species_id), 'setting name for the metabolite '+str(species_id))
+            rpSBML.checklibSBML(spe.setName(species_id), 'setting name for the metabolite '+str(species_id))
         else:
-            rpSBML._checklibSBML(spe.setName(species_name), 'setting name for the metabolite '+str(species_name))
+            rpSBML.checklibSBML(spe.setName(species_name), 'setting name for the metabolite '+str(species_name))
         # this is setting MNX id as the name
         # this is setting the name as the input name
-        # rpSBML._checklibSBML(spe.setAnnotation(self._defaultBRSynthAnnot(meta_id)), 'creating annotation')
-        rpSBML._checklibSBML(spe.setAnnotation(self._defaultBothAnnot(meta_id)), 'creating annotation')
+        # rpSBML.checklibSBML(spe.setAnnotation(self._defaultBRSynthAnnot(meta_id)), 'creating annotation')
+        rpSBML.checklibSBML(spe.setAnnotation(self._defaultBothAnnot(meta_id)), 'creating annotation')
         ###### annotation ###
         self.addUpdateMIRIAM(spe, 'species', chemXref, meta_id)
         ###### BRSYNTH additional information ########
@@ -2969,8 +3004,8 @@ class rpSBML:
                 # TODO: consider creating it if
             else:
                 newM = hetero_group.createMember()
-                rpSBML._checklibSBML(newM, 'Creating a new groups member')
-                rpSBML._checklibSBML(newM.setIdRef(str(species_id)+'__64__'+str(compartment_id)), 'Setting name to the groups member')
+                rpSBML.checklibSBML(newM, 'Creating a new groups member')
+                rpSBML.checklibSBML(newM.setIdRef(str(species_id)+'__64__'+str(compartment_id)), 'Setting name to the groups member')
         # TODO: check that it actually exists
         # add the species to the sink species
         # logging.debug('in_sink_group_id: '+str(in_sink_group_id))
@@ -2982,8 +3017,8 @@ class rpSBML:
                 # TODO: consider creating it if
             else:
                 newM = sink_group.createMember()
-                rpSBML._checklibSBML(newM, 'Creating a new groups member')
-                rpSBML._checklibSBML(newM.setIdRef(str(species_id)+'__64__'+str(compartment_id)), 'Setting name to the groups member')
+                rpSBML.checklibSBML(newM, 'Creating a new groups member')
+                rpSBML.checklibSBML(newM.setIdRef(str(species_id)+'__64__'+str(compartment_id)), 'Setting name to the groups member')
 
 
     #TODO: change the name of this function to createGroup

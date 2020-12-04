@@ -27,6 +27,7 @@ requirements:
     - colored
     - rdkit==2020.03.6
     - networkx
+    - cobra
 
 test:
   source_files:
