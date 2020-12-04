@@ -14,7 +14,6 @@ from tempfile import TemporaryDirectory
 from tarfile  import open       as tar_open
 from brs_libs import rpGraph
 from cobra    import io            as cobra_io
-from cobra    import flux_analysis as cobra_flux_analysis
 
 ## @package RetroPath SBML writer
 # Documentation for SBML representation of the different model
@@ -1300,15 +1299,15 @@ class rpSBML:
         :rtype: bool
         """
         try:
-            with tempfile.TemporaryDirectory() as tmpOutputFolder:
+            with TemporaryDirectory() as tmpOutputFolder:
                 self.writeSBML(tmpOutputFolder)
                 #logging.info(glob.glob(tmpOutputFolder+'/*'))
                 #logging.info(cobra.io.validate_sbml_model(glob.glob(tmpOutputFolder+'/*')[0]))
-                cobraModel = cobra.io.read_sbml_model(glob.glob(tmpOutputFolder+'/*')[0], use_fbc_package=True)
+                cobraModel = cobra_io.read_sbml_model(glob.glob(tmpOutputFolder+'/*')[0], use_fbc_package=True)
             #self.cobraModel = cobra.io.read_sbml_model(self.rpsbml.document.toXMLNode().toXMLString(), use_fbc_package=True)
             #use CPLEX
             # self.cobraModel.solver = 'cplex'
-        except cobra.io.sbml.CobraSBMLError as e:
+        except cobra_io.sbml.CobraSBMLError as e:
             # self.logger.error(e)
             # self.logger.error('Cannot convert the libSBML model to Cobra')
             return False
