@@ -14,6 +14,7 @@ from tempfile import TemporaryDirectory
 from tarfile  import open       as tar_open
 from brs_libs import rpGraph
 from cobra    import io            as cobra_io
+from logging  import getLogger
 
 ## @package RetroPath SBML writer
 # Documentation for SBML representation of the different model
@@ -24,9 +25,9 @@ from cobra    import io            as cobra_io
 # The object holds an SBML object and a series of methods to write and access BRSYNTH related annotations
 
 
-# logging = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.ERROR,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
     datefmt='%d-%m-%Y %H:%M:%S',
 )
@@ -1292,6 +1293,7 @@ class rpSBML:
         #     # logging.info(message)
         #     return None
 
+
     def convertToCobra(self):
         """Convert the rpSBML object to cobra object
 
@@ -1312,6 +1314,59 @@ class rpSBML:
             # self.logger.error('Cannot convert the libSBML model to Cobra')
             return False
         return cobraModel
+
+
+    def addAnalysisResults(self, objective_id, cobra_results, pathway_id='rp_pathway'):
+        """Method to hardcode into BRSynth annotations the results of a COBRA analysis
+
+        :param objective_id: The id of the objective to optimise
+        :param cobra_results: The cobrapy results object
+        :param pathway_id: The id of the heterologous pathway group (Default: rp_pathway)
+
+        :type cobra_results: cobra.ModelSummary
+        :type objective_id: str
+        :type pathway_id: str
+
+        :return: None
+        :rtype: None
+        """
+        logger.debug('----- Setting the results for '+str(objective_id)+ ' -----')
+        groups = self.getModel().getPlugin('groups')
+        self.checklibSBML(groups, 'Getting groups plugin')
+        rp_pathway = groups.getGroup(pathway_id)
+        if rp_pathway==None:
+            logger.warning('The group '+str(pathway_id)+' does not exist... creating it')
+            self.createPathway(pathway_id)
+            rp_pathway = groups.getGroup(pathway_id)
+        self.checklibSBML(rp_pathway, 'Getting RP pathway')
+        #write the results to the rp_pathway
+        logger.debug('Set '+str(pathway_id)+' with '+str('fba_'+str(objective_id))+' to '+str(cobra_results.objective_value))
+        self.addUpdateBRSynth(rp_pathway, 'fba_'+str(objective_id), str(cobra_results.objective_value), 'mmol_per_gDW_per_hr', False)
+        #get the objective
+        fbc_plugin = self.getModel().getPlugin('fbc')
+        self.checklibSBML(fbc_plugin, 'Getting FBC plugin')
+        obj = fbc_plugin.getObjective(objective_id)
+        self.checklibSBML(obj, 'Getting objective '+str(objective_id))
+        self.addUpdateBRSynth(obj, 'flux_value', str(cobra_results.objective_value), 'mmol_per_gDW_per_hr', False)
+        logger.debug('Set the objective '+str(objective_id)+' a flux_value of '+str(cobra_results.objective_value))
+        for flux_obj in obj.getListOfFluxObjectives():
+            #sometimes flux cannot be returned
+            if cobra_results.fluxes.get(flux_obj.getReaction())==None:
+                logger.warning('Cobra BUG: Cannot retreive '+str(flux_obj.getReaction())+' flux from cobrapy... setting to 0.0')
+                self.addUpdateBRSynth(flux_obj, 'flux_value', str(0.0), 'mmol_per_gDW_per_hr', False)
+                logger.debug('Set the reaction '+str(flux_obj.getReaction())+' a flux_value of '+str(0.0))
+            else:
+                self.addUpdateBRSynth(flux_obj, 'flux_value', str(cobra_results.fluxes.get(flux_obj.getReaction())), 'mmol_per_gDW_per_hr', False)
+                logger.debug('Set the reaction '+str(flux_obj.getReaction())+' a flux_value of '+str(cobra_results.fluxes.get(flux_obj.getReaction())))
+        #write all the results to the reactions of pathway_id
+        for member in rp_pathway.getListOfMembers():
+            reac = self.getModel().getReaction(member.getIdRef())
+            if reac==None:
+                logger.error('Cannot retreive the following reaction: '+str(member.getIdRef()))
+                #return False
+                continue
+            logger.debug('Set the reaction '+str(member.getIdRef())+' a '+str('fba_'+str(objective_id))+' of '+str(cobra_results.fluxes.get(reac.getId())))
+            self.addUpdateBRSynth(reac, 'fba_'+str(objective_id), str(cobra_results.fluxes.get(reac.getId())), 'mmol_per_gDW_per_hr', False)
 
 
     def _nameToSbmlId(self, name):
