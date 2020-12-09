@@ -5,12 +5,11 @@ from hashlib  import sha256
 from os       import makedirs   as os_mkdirs
 from os       import path       as os_path
 from os       import replace    as os_replace
-from glob     import glob
 from copy     import deepcopy
 from pandas   import DataFrame  as pd_DataFrame
 from inspect  import getmembers as inspect_getmembers
 from inspect  import ismethod   as inspect_ismethod
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, NamedTemporaryFile
 from tarfile  import open       as tar_open
 from brs_libs import rpGraph
 from cobra    import io            as cobra_io
@@ -65,7 +64,7 @@ class rpSBML:
             except FileNotFoundError as e:
                 print(e)
         elif document:
-            self.document  = document
+            self.document = document
 
         if name:
             self.modelName = name
@@ -1301,11 +1300,11 @@ class rpSBML:
         :rtype: bool
         """
         try:
-            with TemporaryDirectory() as tmpOutputFolder:
-                self.writeSBML(tmpOutputFolder)
-                #logging.info(glob.glob(tmpOutputFolder+'/*'))
-                #logging.info(cobra.io.validate_sbml_model(glob.glob(tmpOutputFolder+'/*')[0]))
-                cobraModel = cobra_io.read_sbml_model(glob.glob(tmpOutputFolder+'/*')[0], use_fbc_package=True)
+            with NamedTemporaryFile() as temp_f:
+                self.writeSBML(temp_f.name)
+                #logging.info(glob(tmpOutputFolder+'/*'))
+                #logging.info(cobra.io.validate_sbml_model(glob(tmpOutputFolder+'/*')[0]))
+                cobraModel = cobra_io.read_sbml_model(temp_f.name, use_fbc_package=True)
             #self.cobraModel = cobra.io.read_sbml_model(self.rpsbml.document.toXMLNode().toXMLString(), use_fbc_package=True)
             #use CPLEX
             # self.cobraModel.solver = 'cplex'
