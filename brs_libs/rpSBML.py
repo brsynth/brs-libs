@@ -328,7 +328,7 @@ class rpSBML:
         # self.logger.debug('targetObjectiveID: '+str(targetObjectiveID))
         # self.logger.debug('sourceObjectiveID: '+str(sourceObjectiveID))
         ################ SPECIES ####################
-        species_source_target = rpSBML.compareSpecies(comp_source_target, source_rpsbml, target_rpsbml, logger)
+        species_source_target = rpSBML.compareSpecies(comp_source_target, source_rpsbml, target_rpsbml, logger=logger)
         # self.logger.debug('species_source_target: '+str(species_source_target))
         target_species_ids = [i.id for i in target_rpsbml.getModel().getListOfSpecies()]
         for source_species in species_source_target:
@@ -396,7 +396,7 @@ class rpSBML:
         for source_reaction in source_rpsbml.getModel().getListOfReactions():
             is_found = False
             for target_reaction in target_rpsbml.getModel().getListOfReactions():
-                score, match = rpSBML.compareReaction(species_source_target, source_reaction, target_reaction, logger)
+                score, match = rpSBML.compareReaction(species_source_target, source_reaction, target_reaction, logger=logger)
                 if match:
                     # self.logger.debug('Source reaction '+str(source_reaction)+' matches with target reaction '+str(target_reaction))
                     # source_reaction[source_reaction.getId()] = target_reaction.getId()
@@ -538,7 +538,7 @@ class rpSBML:
         ###### TITLES #####
         target_rpsbml.getModel().setId(target_rpsbml.getModel().getId()+'__'+source_rpsbml.getModel().getId())
         target_rpsbml.getModel().setName(target_rpsbml.getModel().getName()+' merged with '+source_rpsbml.getModel().getId())
-        rpSBML._checkSingleParent(target_rpsbml, logger)
+        rpSBML._checkSingleParent(target_rpsbml, logger=logger)
         return species_source_target, reactions_source_target
 
 
@@ -573,7 +573,7 @@ class rpSBML:
         :return: Success of failure of the function
         """
         logger = logger or logging.getLogger(__name__)
-        rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id, logger)
+        rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id, logger=logger)
         consumed_species_nid = rpgraph.onlyConsumedSpecies()
         produced_species_nid = rpgraph.onlyProducedSpecies()
         for pro in produced_species_nid:
@@ -1092,7 +1092,7 @@ class rpSBML:
             source_target_mat[i] = {}
             for y in source_target[i]:
                 source_target_mat[i][y] = source_target[i][y]['score']
-        unique = rpSBML._findUniqueRowColumn(pd_DataFrame(source_target_mat), logger)
+        unique = rpSBML._findUniqueRowColumn(pd_DataFrame(source_target_mat), logger=logger)
         # self.logger.debug('findUniqueRowColumn:')
         # self.logger.debug(unique)
         for meas in source_target:
@@ -1185,12 +1185,12 @@ class rpSBML:
         reactions = {}
         for reaction_id in pathway.readRPpathwayIDs():
             reaction = model.getReaction(reaction_id)
-            reactions[reaction_id] = rpSBML.readBRSYNTHAnnotation(reaction.getAnnotation(), logger)
+            reactions[reaction_id] = rpSBML.readBRSYNTHAnnotation(reaction.getAnnotation(), logger=logger)
 
         # Get Species
         species = {}
         for specie in model.getListOfSpecies():
-            species[specie.getId()] = rpSBML.readBRSYNTHAnnotation(specie.getAnnotation(), logger)
+            species[specie.getId()] = rpSBML.readBRSYNTHAnnotation(specie.getAnnotation(), logger=logger)
 
         # Pathways dict
         d_reactions = {}
