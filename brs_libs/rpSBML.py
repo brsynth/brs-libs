@@ -573,7 +573,7 @@ class rpSBML:
         :return: Success of failure of the function
         """
         logger = logger or logging.getLogger(__name__)
-        rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id)
+        rpgraph = rpGraph.rpGraph(rpsbml, True, pathway_id, central_species_group_id, sink_species_group_id, logger)
         consumed_species_nid = rpgraph.onlyConsumedSpecies()
         produced_species_nid = rpgraph.onlyProducedSpecies()
         for pro in produced_species_nid:
