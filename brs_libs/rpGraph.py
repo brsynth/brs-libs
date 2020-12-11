@@ -8,9 +8,7 @@ import random
 
 
 logging.basicConfig(
-    level=logging.DEBUG,
-    #level=logging.WARNING,
-    #level=logging.ERROR,
+    level=logging.ERROR,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
     datefmt='%d-%m-%Y %H:%M:%S',
 )
@@ -18,7 +16,13 @@ logging.basicConfig(
 class rpGraph:
     """The class that hosts the networkx related functions
     """
-    def __init__(self, rpsbml=None, is_gem_sbml=False, pathway_id='rp_pathway', central_species_group_id='central_species', sink_species_group_id='rp_sink_species'):
+    def __init__(self,
+                 rpsbml=None,
+                 is_gem_sbml=False,
+                 pathway_id='rp_pathway',
+                 central_species_group_id='central_species',
+                 sink_species_group_id='rp_sink_species',
+                 logger=None):
         """Constructor of the class
 
         Automatically constructs the network when calling the construtor
@@ -31,8 +35,8 @@ class rpGraph:
         :type pathway_id: str
         :type species_group_id: str
         """
+        self.logger = logger or logging.getLogger(__name__)
         self.rpsbml = rpsbml
-        self.logger = logging.getLogger(__name__)
         #WARNING: change this to reflect the different debugging levels
         self.logger.debug('Started instance of rpGraph')
         self.pathway_id = pathway_id
@@ -78,7 +82,7 @@ class rpGraph:
         rp_pathway = groups.getGroup(pathway_id)
         rp_species_id = self.rpsbml.readUniqueRPspecies(pathway_id)
         rp_reactions_id = [i.getIdRef() for i in rp_pathway.getListOfMembers()]
-        logging.debug('rp_reactions_id: '+str(rp_reactions_id))
+        self.logger.debug('rp_reactions_id: '+str(rp_reactions_id))
         self.G = nx.DiGraph(brsynth=self.rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation()))
         #### add ALL the species and reactions ####
         #nodes
@@ -116,15 +120,15 @@ class rpGraph:
                                 rp_pathway=is_rp_pathway)
         #edges
         for reaction in rpsbml_model.getListOfReactions():
-            logging.debug('Adding edges for the reaction: '+str(reaction.getId()))
+            self.logger.debug('Adding edges for the reaction: '+str(reaction.getId()))
             if reaction.getId() in rp_reactions_id or is_gem_sbml:
                 for reac in reaction.getListOfReactants():
-                    logging.debug('\taAdding edge '+str(reac.species)+' --> '+str(reaction.getId()))
+                    self.logger.debug('\taAdding edge '+str(reac.species)+' --> '+str(reaction.getId()))
                     self.G.add_edge(reac.species,
                                     reaction.getId(),
                                     stoichio=reac.stoichiometry)
                 for prod in reaction.getListOfProducts():
-                    logging.debug('\taAdding edge '+str(reaction.getId())+' --> '+str(prod.species))
+                    self.logger.debug('\taAdding edge '+str(reaction.getId())+' --> '+str(prod.species))
                     self.G.add_edge(reaction.getId(),
                                     prod.species,
                                     stoichio=reac.stoichiometry)
