@@ -1,3 +1,6 @@
+1.3.0 - Dec 11, 2020
+    - add logger customisable from outside of the module
+
 1.2.1 - Dec 9, 2020
     - fix file writing in convertToCobra()
 
